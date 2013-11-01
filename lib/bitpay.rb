@@ -7,9 +7,18 @@ require 'bitpay/client'
 require 'bitpay/version'
 
 module BitPay
+  # Location of the directory of SSL certificates.
   DATA_DIR = File.join File.dirname(__FILE__), 'bitpay', 'data'
-  CERT     = File.join DATA_DIR, 'cert.pem'
-  KEY      = File.join DATA_DIR, 'key.pem'
-  API_URI  = 'https://bitpay.com/api'
-  USER_AGENT = 'bitpay-ruby '+VERSION
+
+  # SSL Certificate
+  CERT = File.join DATA_DIR, 'cert.pem'
+
+  # SSL Key
+  KEY = File.join DATA_DIR, 'key.pem'
+
+  # Location of API
+  API_URI = 'https://bitpay.com/api'
+
+  # User agent reported to API
+  USER_AGENT = 'ruby-bitpay-client '+VERSION
 end

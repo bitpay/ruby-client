@@ -1,5 +1,3 @@
-# Bundler.setup
-require 'rubygems'
 require 'addressable/uri'
 require 'json'
 require 'minitest/autorun'

@@ -1,9 +1,19 @@
 require File.join File.dirname(__FILE__), '..', 'env.rb'
 
-USER_AGENT = 'bitpay-ruby '+BitPay::VERSION
+USER_AGENT = 'ruby-bitpay-client '+BitPay::VERSION
 
 def invoice_body
-  {"id"=>"DGrAEmbsXe9bavBPMJ8kuk", "url"=>"https://bitpay.com/invoice?id=DGrAEmbsXe9bavBPMJ8kuk", "status"=>"new", "btcPrice"=>"0.0495", "price"=>10, "currency"=>"USD", "invoiceTime"=>1383265343674, "expirationTime"=>1383266243674, "currentTime"=>1383265957613}
+  {
+    "id"             => "DGrAEmbsXe9bavBPMJ8kuk",
+    "url"            => "https://bitpay.com/invoice?id=DGrAEmbsXe9bavBPMJ8kuk",
+    "status"         => "new",
+    "btcPrice"       => "0.0495",
+    "price"          => 10,
+    "currency"       => "USD",
+    "invoiceTime"    => 1383265343674,
+    "expirationTime" => 1383266243674,
+    "currentTime"    => 1383265957613
+  }
 end
 
 stub_request(:post, "https://KEY:@bitpay.com/api/invoice/create").
@@ -21,7 +31,7 @@ describe BitPay::Client do
 
   describe 'post' do
     it 'creates invoice' do
-      response = @client.post 'invoice/create'
+      response = @client.post 'invoice/create', {}
       response.class.must_equal Hash
       response['id'].must_equal 'DGrAEmbsXe9bavBPMJ8kuk'
     end

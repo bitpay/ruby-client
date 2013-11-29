@@ -13,9 +13,6 @@ module BitPay
   # SSL Certificate
   CERT = File.join DATA_DIR, 'cert.pem'
 
-  # SSL Key
-  KEY = File.join DATA_DIR, 'key.pem'
-
   # Location of API
   API_URI = 'https://bitpay.com/api'
 

@@ -19,7 +19,6 @@ module BitPay
       @https             = Net::HTTP.new @uri.host, @uri.port
       @https.use_ssl     = true
       @https.cert        = OpenSSL::X509::Certificate.new File.read(opts[:cert] || CERT)
-      @https.key         = OpenSSL::PKey::RSA.new File.read(opts[:key] || KEY)
       @https.verify_mode = OpenSSL::SSL::VERIFY_PEER
     end
 

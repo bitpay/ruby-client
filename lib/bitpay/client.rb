@@ -45,7 +45,7 @@ module BitPay
       request = Net::HTTP::Post.new @uri.path+'/'+path
       request.basic_auth @api_key, ''
       request['User-Agent'] = USER_AGENT
-      request.body = params
+      request.body = params.to_query
       response = @https.request request
       JSON.parse response.body
     end

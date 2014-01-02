@@ -1,8 +1,5 @@
 libdir = File.dirname(__FILE__)
 $LOAD_PATH.unshift(libdir) unless $LOAD_PATH.include?(libdir)
-require 'json'
-require 'uri'
-require 'net/https'
 require 'bitpay/client'
 require 'bitpay/version'
 

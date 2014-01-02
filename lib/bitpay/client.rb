@@ -1,3 +1,7 @@
+require 'uri'
+require 'net/https'
+require 'json'
+
 module BitPay
   # This class is used to instantiate a BitPay Client object. It is expected to be thread safe.
   #
@@ -45,7 +49,8 @@ module BitPay
       request = Net::HTTP::Post.new @uri.path+'/'+path
       request.basic_auth @api_key, ''
       request['User-Agent'] = USER_AGENT
-      request.body = params
+      request['Content-Type'] = 'application/json'
+      request.body = params.to_json
       response = @https.request request
       JSON.parse response.body
     end

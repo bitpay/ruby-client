@@ -17,6 +17,7 @@ Or directly:
 
 To create an invoice:
 
+    client = BitPay::Client.new 'YOUR_API_KEY'
     invoice = client.post 'invoice', {:price => 10.00, :currency => 'USD'}
 
 With invoice creation, `price` and `currency` are the only required fields. If you are sending a customer from your website to make a purchase, setting `redirectURL` is 

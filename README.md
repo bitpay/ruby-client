@@ -58,6 +58,3 @@ In addition to a full test suite, there is Travis integration for MRI 1.9, JRuby
 
 ## Found a bug?
 Let us know! Send a pull request or a patch. Questions? Ask! We're here to help. We will respond to all filed issues.
-
-## Authors
-* Kyle Drake

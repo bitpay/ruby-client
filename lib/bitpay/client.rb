@@ -50,7 +50,7 @@ module BitPay
       request.basic_auth @api_key, ''
       request['User-Agent'] = USER_AGENT
       request['Content-Type'] = 'application/json'
-      request['X-BitPay-Plugin-Info'] = 'Rubylib0.1.2'
+      request['X-BitPay-Plugin-Info'] = 'Rubylib' + VERSION
       request.body = params.to_json
       response = @https.request request
       JSON.parse response.body

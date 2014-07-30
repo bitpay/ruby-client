@@ -22,8 +22,12 @@ module BitPay
       @uri               = URI.parse opts[:api_uri] || API_URI
       @https             = Net::HTTP.new @uri.host, @uri.port
       @https.use_ssl     = true
-      @https.cert        = OpenSSL::X509::Certificate.new File.read(opts[:cert] || CERT)
-      @https.verify_mode = OpenSSL::SSL::VERIFY_PEER
+      @https.ca_file     = CA_FILE
+
+
+      # Option to disable certificate validation in extraordinary circumstance.  NOT recommended for production use
+      @https.verify_mode = opts[:insecure] == true ? OpenSSL::SSL::VERIFY_NONE : OpenSSL::SSL::VERIFY_PEER
+
     end
 
     # Makes a GET call to the BitPay API.
@@ -46,6 +50,7 @@ module BitPay
     #  # Create an invoice:
     #  created_invoice = client.post 'invoice', {:price => 1.45, :currency => 'BTC'}
     def post(path, params={})
+
       request = Net::HTTP::Post.new @uri.path+'/'+path
       request.basic_auth @api_key, ''
       request['User-Agent'] = USER_AGENT

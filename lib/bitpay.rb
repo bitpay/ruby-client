@@ -4,11 +4,10 @@ require 'bitpay/client'
 require 'bitpay/version'
 
 module BitPay
-  # Location of the directory of SSL certificates.
-  DATA_DIR = File.join File.dirname(__FILE__), 'bitpay', 'data'
 
-  # SSL Certificate
-  CERT = File.join DATA_DIR, 'cert.pem'
+  # Location of SSL Certificate Authority File
+  # As sourced from http://curl.haxx.se/ca/cacert.pem
+  CA_FILE = File.join File.dirname(__FILE__), 'bitpay','cacert.pem'
 
   # Location of API
   API_URI = 'https://bitpay.com/api'

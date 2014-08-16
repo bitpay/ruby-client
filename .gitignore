@@ -2,3 +2,6 @@
 test.rb
 Gemfile.lock
 pkg
+.c9
+.ruby-version
+.ruby-gemset

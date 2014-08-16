@@ -10,7 +10,7 @@ module BitPay
   CA_FILE = File.join File.dirname(__FILE__), 'bitpay','cacert.pem'
 
   # Location of API
-  API_URI = 'https://bitpay.com/api'
+  API_URI = 'https://test.bitpay.com/api/v2'
 
   # User agent reported to API
   USER_AGENT = 'ruby-bitpay-client '+VERSION

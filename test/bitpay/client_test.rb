@@ -36,6 +36,10 @@ describe BitPay::Client do
     @client = BitPay::Client.new 'KEY'
   end
 
+  describe 'initialize' do
+    it 'accepts a custom user_agent string'
+  end
+
   describe 'post' do
     it 'creates invoice' do
       response = @client.post 'invoice/create', invoice_create_body
@@ -45,10 +49,14 @@ describe BitPay::Client do
   end
 
   describe 'get' do
-    it 'retreives invoice' do
+    it 'retrieves invoice' do
       response = @client.get 'invoice/DGrAEmbsXe9bavBPMJ8kuk'
       response.class.must_equal Hash
       response['id'].must_equal 'DGrAEmbsXe9bavBPMJ8kuk'
     end
   end
+
+  describe 'generate_sin_from_keypair'
+  describe 'generate_keypair_and_sin'
+
 end

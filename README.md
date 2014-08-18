@@ -42,6 +42,14 @@ To get updated information on this invoice, make a get call with the id returned
 
     invoice = client.get 'invoice/DGrAEmbsXe9bavBPMJ8kuk'
 
+## Testnet Usage
+
+During development and testing, take advantage of the [Bitcoin TestNet](https://en.bitcoin.it/wiki/Testnet) by passing a custom `api_uri` option on initialization:
+
+    BitPay::Client.new("myAPIKey", {api_uri: "https://test.bitpay.com/api"})
+    
+Note that you will need a separate API key for `test.bitpay.com` which can be obtained by registering for a test account at https://test.bitpay.com/start
+
 ## API Documentation
 
 API Documentation is available on the [BitPay site](https://bitpay.com/bitcoin-payment-gateway-api).

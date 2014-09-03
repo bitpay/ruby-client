@@ -5,6 +5,9 @@ require 'ecdsa'
 require 'securerandom'
 require 'digest/sha2'
 
+# dev dependencies
+require 'pry'
+
 module BitPay
   # This class is used to instantiate a BitPay Client object. It is expected to be thread safe.
   #
@@ -22,8 +25,9 @@ module BitPay
     #  client = BitPay::Client.new 'YOUR_API_KEY'
     def initialize(opts={})
       # TODO:  Think about best way to store keys
-      @pub_key           = ENV['pubkey']
-      @priv_key          = ENV['privkey']
+      @pub_key           = opts[:pub_key] || ENV['pubkey'].strip || raise(BitPayError)  # should be able to compute this
+      @priv_key          = opts[:priv_key] || ENV['privkey'].strip || raise(BitPayError)
+      @SIN               = ENV['SIN'] || raise(BitPayError, "No SIN found") # should be able to compute this
       @uri               = URI.parse opts[:api_uri] || API_URI
       @user_agent        = opts[:user_agent] || USER_AGENT
       @https             = Net::HTTP.new @uri.host, @uri.port
@@ -32,51 +36,53 @@ module BitPay
 
       # Option to disable certificate validation in extraordinary circumstance.  NOT recommended for production use
       @https.verify_mode = opts[:insecure] == true ? OpenSSL::SSL::VERIFY_NONE : OpenSSL::SSL::VERIFY_PEER
+      
+      # Option to enable http request debugging
+      @https.set_debug_output($stdout) if opts[:debug] == true
 
-      # TODO:  How do I choose facade
-      @token             = get_token('merchant')
-
+      # Load all the available tokens into @tokens
+      load_tokens      
     end
 
-    # Makes a GET call to the BitPay API.
-    # @return [Hash]
-    # @see get_invoice
-    # @example
-    #  # Get an invoice:
-    #  existing_invoice = client.get 'invoice/YOUR_INVOICE_ID'
-    def get(path)
-      url = @uri.path + '/' + path + '?nonce=' + Time.now.strftime('%Y%m%d%H%M%S%L') + '&token=' + @token
-      request = Net::HTTP::Get.new url
-      
+    ## Generates REST request to api endpoint
+    def send_request(verb, path, facade='merchant', params={})
+      token = @tokens[facade] || raise(BitPayError, "No token for specified facade: #{facade}")
+
+      # Verb-specific logic
+      case verb.upcase
+        when "GET"
+          urlpath = '/' + path + '?nonce=' + nonce + '&token=' + token
+          request = Net::HTTP::Get.new urlpath
+          request['X-Signature'] = sign(@uri.to_s + urlpath)
+
+        when "PUT"
+
+        when "POST"  # Requires a GUID
+
+          urlpath = '/' + path
+          request = Net::HTTP::Post.new urlpath
+          params[:token] = token
+          params[:nonce] = nonce
+          params[:guid]  = SecureRandom.uuid
+          request.body = params.to_json
+          request['X-Signature'] = sign(@uri.to_s + urlpath + request.body)
+
+        when "DELETE"
+        else 
+          raise(BitPayError, "Invalid HTTP verb: #{verb.upcase}")
+      end
+
+      # Build request headers and submit
       request['User-Agent'] = @user_agent
       request['Content-Type'] = 'application/json'
       request['X-BitPay-Plugin-Info'] = 'Rubylib' + VERSION
-      request['X-PubKey'] = @pub_key
-      request['X-Signature'] = sign(url, @priv_key.to_i(16))
-
-      response = @https.request request
-      JSON.parse response.body
-    end
-
-    # Makes a POST call to the BitPay API.
-    # @return [Hash]
-    # @see create_invoice
-    #  # Create an invoice:
-    #  created_invoice = client.post 'invoice', {:price => 1.45, :currency => 'BTC'}
-    def post(path, params={})
-
-      request = Net::HTTP::Post.new @uri.path+'/'+path
-      request.body = build_bitauth_message(params)
-      
-      request['User-Agent'] = @user_agent
-      request['Content-Type'] = 'application/json'
-      request['X-BitPay-Plugin-Info'] = 'Rubylib' + VERSION
-      request['X-PubKey'] = @pub_key
-      request['X-Signature'] = sign(request.body, @priv_key.to_i(16))
+      request['X-Identity'] = @pub_key
  
       response = @https.request request
       JSON.parse response.body
+
     end
+
 
     ## Generates a SIN based on public and private keys
     #  Can be passed public and private keys or will use pub/private key from file-system by default
@@ -89,53 +95,74 @@ module BitPay
     def generate_keypair_and_sin
     end
 
+##### COMPATIBILITY METHODS #####
+
+    ## Provided for legacy compatibility with old library
+    #
+    def get(path)
+      send_request("GET", path)
+    end
+
+    ## Provided for legacy compatibility with old library
+    #
+    def post(path, params={})
+      send_request("POST", path, 'merchant', params)
+    end
 
 ##### PRIVATE METHODS #####
     private
 
-    ## Adds token and nonce to message body
+    ## Generate a new nonce based on UTC timestamp
     #
-    def build_bitauth_message(message)
-      puts "in bitauthbuild"
-      message[:token] = @token
-      message[:nonce] = Time.now.strftime('%Y%m%d%H%M%S%L')
-      puts message.inspect
-      message.to_json
-
+    def nonce
+      Time.now.utc.strftime('%Y%m%d%H%M%S%L')
     end
 
-    ## Requests token
+    ## Requests token by appending nonce and signing URL
+    #  Returns a hash of available tokens
     #
-    def get_token(facade)
-      # TODO: Assemble this from endpoint var
-      url = 'https://test.bitpay.com/tokens?nonce=' + Time.now.strftime('%Y%m%d%H%M%S%L')
-      xsignature = sign(url,@priv_key.to_i(16))
+    def load_tokens
 
-      request = Net::HTTP::Get.new url
-      request['User-Agent'] = @user_agent
-      request['X-PubKey'] = @pub_key
-      request['X-Signature'] = sign(url, @priv_key.to_i(16))
-    
+      urlpath = '/tokens?nonce=' + nonce
+
+      request = Net::HTTP::Get.new(urlpath)
+      request['content-type'] = "application/json"
+      request['user-agent'] = @user_agent
+      request['x-identity'] = @pub_key
+      request['x-signature'] = sign(@uri.to_s + urlpath)
+
       response = @https.request request
-    
-      token = JSON.parse(response)
-      token = token["data"].select { |item| item.has_key?(facade)}.first[facade]
-      raise SecurityError,"You do not have permission for the specified facade" if token == nil 
-      puts "token is #{token}"
-      return token
+
+      # /tokens returns an array of hashes.  Let's turn it into a more useful single hash
+      token_array = JSON.parse(response.body)["data"]
+
+      tokens = {}
+      token_array.each do |t|
+        tokens[t.keys.first] = t.values.first
+      end
+
+      @tokens = tokens
+      return tokens
+
     end
 
-    ## 
+    ## Retrieves specified token from hash, otherwise tries to refresh @tokens and retry
+    def get_token(facade)
+      token = @tokens[facade] || load_tokens[facade] || raise(BitPayError, "Not authorized for facade: #{facade}")
+    end
+
+    ## Generate ECDSA signature
     #
-    def sign(message,private_key)
+    def sign(message)
       group = ECDSA::Group::Secp256k1
       digest = Digest::SHA256.digest(message)
       signature = nil
       while signature.nil?
         temp_key = 1 + SecureRandom.random_number(group.order - 1)
-        signature = ECDSA.sign(group, private_key, digest, temp_key)              
-      end
+      signature = ECDSA.sign(group, @priv_key.to_i(16), digest, temp_key)
+      
       return ECDSA::Format::SignatureDerString.encode(signature).unpack("H*").first
+      end
     end
   end
 end

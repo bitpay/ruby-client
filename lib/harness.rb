@@ -1,4 +1,5 @@
 require_relative 'bitpay.rb'
+require_relative 'bitpay/key_utils.rb'
 
 # Test SIN Generation class methods
 
@@ -6,7 +7,7 @@ require_relative 'bitpay.rb'
 ENV["privkey"] = "16d7c3508ec59773e71ae728d29f41fcf5d1f380c379b99d68fa9f552ce3ebc3"
 puts "privkey: #{ENV['privkey']}"
 puts "target SIN: TfFVQhy2hQvchv4VVG4c7j4XPa2viJ9HrR8"
-puts "Derived SIN: #{BitPay::Client.get_sin}"
+puts "Derived SIN: #{BitPay::KeyUtils.get_sin}"
 
 puts "\n\n------------------\n\n"
 

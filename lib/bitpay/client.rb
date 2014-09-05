@@ -1,13 +1,8 @@
 require 'uri'
 require 'net/https'
 require 'json'
-require 'ecdsa'
-require 'securerandom'
-require 'digest/sha2'
 
-# dev dependencies
-require 'pry'
-
+require_relative 'key_utils'
 module BitPay
   # This class is used to instantiate a BitPay Client object. It is expected to be thread safe.
   #
@@ -51,9 +46,9 @@ module BitPay
       # Verb-specific logic
       case verb.upcase
         when "GET"
-          urlpath = '/' + path + '?nonce=' + nonce + '&token=' + token
+          urlpath = '/' + path + '?nonce=' + KeyUtils.nonce + '&token=' + token
           request = Net::HTTP::Get.new urlpath
-          request['X-Signature'] = sign(@uri.to_s + urlpath)
+          request['X-Signature'] = KeyUtils.sign(@uri.to_s + urlpath, @priv_key)
 
         when "PUT"
 
@@ -62,10 +57,10 @@ module BitPay
           urlpath = '/' + path
           request = Net::HTTP::Post.new urlpath
           params[:token] = token
-          params[:nonce] = nonce
+          params[:nonce] = KeyUtils.nonce
           params[:guid]  = SecureRandom.uuid
           request.body = params.to_json
-          request['X-Signature'] = sign(@uri.to_s + urlpath + request.body)
+          request['X-Signature'] = KeyUtils.sign(@uri.to_s + urlpath + request.body, @priv_key)
 
         when "DELETE"
         else 
@@ -102,80 +97,21 @@ module BitPay
     def self.get_public_key
     end
 
-    ## Generates a SIN from private key
-    def self.get_sin
-      #http://blog.bitpay.com/2014/07/01/bitauth-for-decentralized-authentication.html
-      #https://en.bitcoin.it/wiki/Identity_protocol_v1
-
-      # NOTE:  All Digests are calculated against the binary representation, 
-      # hence the requirement to use [].pack("H*")
-      
-      group = ECDSA::Group::Secp256k1
-      
-      #Generate Private Key
-      #private_key = 1 + SecureRandom.random_number(group.order - 1)
-      private_key = ENV["privkey"].to_i(16)      
-
-      #Generate Public Key
-      public_key = group.generator.multiply_by_scalar(private_key)
-      public_key_string_compressed = ECDSA::Format::PointOctetString.encode(public_key, compression:true)
-      puts "Public Key: #{public_key_string_compressed.unpack("H*").first}" 
-      
-      # Step 1: SHA-256 of Public Key
-      step_one = Digest::SHA256.hexdigest(public_key_string_compressed)  # Works when PK is in binary format
-      #puts "step_one: #{step_one}"
-
-      # Step 2: RIPEMD-160 of Step 1
-      step_two = Digest::RMD160.hexdigest([step_one].pack("H*")) 
-      #puts "step_two #{step_two}"
-
-      # Step 3: Version + SIN TYPE + Step 2
-      step_three = "0F02" + step_two
-      #puts "step_three: #{step_three}"
-
-      # Step 4: Double SHA-256 of Step 3
-      step_four = Digest::SHA256.hexdigest([Digest::SHA256.hexdigest([step_three].pack("H*"))].pack("H*"))
-      #puts "step_four: #{step_four}"
-
-      # Step 5: Checksum (first 8 chars)
-      step_five = step_four[0..7]
-      #puts "step_five: #{step_five}"
-
-      # Step 6: Step 3 + Step 5
-      step_six = step_three + step_five
-      #puts "step_six: #{step_six}"
-
-      # Step 7: Base58 Encode
-      step_seven = encode_base58(step_six)
-      #puts "step_seven: #{step_seven}"
-
-      # Return the SIN
-      return step_seven
-      
-    end
-
-
 ##### PRIVATE METHODS #####
     private
-
-    ## Generate a new nonce based on UTC timestamp
-    #
-    def nonce
-      Time.now.utc.strftime('%Y%m%d%H%M%S%L')
-    end
 
     ## Requests token by appending nonce and signing URL
     #  Returns a hash of available tokens
     #
     def load_tokens
 
-      urlpath = '/tokens?nonce=' + nonce
+      urlpath = '/tokens?nonce=' + KeyUtils.nonce
 
       request = Net::HTTP::Get.new(urlpath)
       request['content-type'] = "application/json"
       request['user-agent'] = @user_agent
       request['x-identity'] = @pub_key
-      request['x-signature'] = sign(@uri.to_s + urlpath)
+      request['x-signature'] = KeyUtils.sign(@uri.to_s + urlpath, @priv_key)
 
       response = @https.request request
 
@@ -195,20 +131,6 @@ module BitPay
     ## Retrieves specified token from hash, otherwise tries to refresh @tokens and retry
     def get_token(facade)
       token = @tokens[facade] || load_tokens[facade] || raise(BitPayError, "Not authorized for facade: #{facade}")
-    end
-
-    ## Generate ECDSA signature
-    #
-    def sign(message)
-      group = ECDSA::Group::Secp256k1
-      digest = Digest::SHA256.digest(message)
-      signature = nil
-      while signature.nil?
-        temp_key = 1 + SecureRandom.random_number(group.order - 1)
-      signature = ECDSA.sign(group, @priv_key.to_i(16), digest, temp_key)
-      
-      return ECDSA::Format::SignatureDerString.encode(signature).unpack("H*").first
-      end
     end
 
     ## Base58 Encoding Method

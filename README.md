@@ -52,7 +52,7 @@ Note that you will need a separate API key for `test.bitpay.com` which can be ob
 
 ## API Documentation
 
-API Documentation is available on the [BitPay site](https://bitpay.com/bitcoin-payment-gateway-api).
+API Documentation is available on the [BitPay site](https://bitpay.com/api).
 
 ## RDoc/YARD Documentation
 The code has been fully code documented, and the latest version is always available at the [Rubydoc Site](http://rubydoc.info/gems/bitpay-client).

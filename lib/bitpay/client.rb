@@ -3,6 +3,7 @@ require 'net/https'
 require 'json'
 
 require_relative 'key_utils'
+
 module BitPay
   # This class is used to instantiate a BitPay Client object. It is expected to be thread safe.
   #
@@ -10,7 +11,7 @@ module BitPay
   #  # Create a client with your BitPay API key (obtained from the BitPay API access page at BitPay.com):
   #  client = BitPay::Client.new 'YOUR_API_KEY'
   class Client
-    class BitPayError < StandardError; end
+    
 
     # Creates a BitPay Client object. The second parameter is a hash for overriding defaults.
     #
@@ -20,9 +21,9 @@ module BitPay
     #  client = BitPay::Client.new 'YOUR_API_KEY'
     def initialize(opts={})
       # TODO:  Think about best way to store keys
-      @pub_key           = opts[:pub_key] || ENV['pubkey'].strip || raise(BitPayError)  # should be able to compute this
-      @priv_key          = opts[:priv_key] || ENV['privkey'].strip || raise(BitPayError)
-      @SIN               = ENV['SIN'] || raise(BitPayError, "No SIN found") # should be able to compute this
+      @priv_key          = opts[:priv_key] || ENV['PRIV_KEY'] || (raise BitPayError, MISSING_KEY)
+      @pub_key           = KeyUtils.get_public_key(@priv_key)
+      @SIN               = KeyUtils.get_sin(@priv_key)
       @uri               = URI.parse opts[:api_uri] || API_URI
       @user_agent        = opts[:user_agent] || USER_AGENT
       @https             = Net::HTTP.new @uri.host, @uri.port
@@ -92,11 +93,6 @@ module BitPay
       send_request("POST", path, 'merchant', params)
     end
 
-##### CLASS METHODS #####
-
-    def self.get_public_key
-    end
-
 ##### PRIVATE METHODS #####
     private
 
@@ -131,32 +127,6 @@ module BitPay
     ## Retrieves specified token from hash, otherwise tries to refresh @tokens and retry
     def get_token(facade)
       token = @tokens[facade] || load_tokens[facade] || raise(BitPayError, "Not authorized for facade: #{facade}")
-    end
-
-    ## Base58 Encoding Method
-    #
-    def self.encode_base58 (data) 
-      code_string = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
-      base = 58
-
-      x = data.hex
-      
-      output_string = ""
-
-      while x > 0 do
-        remainder = x % base
-        x = x / base
-        output_string << code_string[remainder]
-      end
-
-      pos = 0
-      
-      while data[pos,2] == "00" do
-        output_string << code_string[0]
-        pos += 2
-      end
-
-     output_string.reverse()
     end
 
   end

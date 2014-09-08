@@ -10,8 +10,14 @@ module BitPay
   CA_FILE = File.join File.dirname(__FILE__), 'bitpay','cacert.pem'
 
   # Location of API
-  API_URI = 'https://test.bitpay.com'
+  API_URI = 'https://bitpay.com'
+  TEST_API_URI = 'https://test.bitpay.com'
 
   # User agent reported to API
   USER_AGENT = 'ruby-bitpay-client '+VERSION
+  
+  MISSING_KEY = 'No Private Key specified.  Pass priv_key or set ENV variable PRIV_KEY'
+  
+  class BitPayError < StandardError; end
+  
 end

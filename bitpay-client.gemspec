@@ -16,6 +16,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'json'
   s.add_dependency 'rack',    '>= 0'
   s.add_dependency 'ecdsa'
+  s.add_dependency 'commander'
 
   s.add_development_dependency 'rake'
   s.add_development_dependency 'minitest'

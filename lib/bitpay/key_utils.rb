@@ -11,12 +11,19 @@ module BitPay
       def self.nonce
         Time.now.utc.strftime('%Y%m%d%H%M%S%L')
       end
-      
+
       def self.generate_private_key
-        private_key = 1 + SecureRandom.random_number(@@group.order - 1)
+        1 + SecureRandom.random_number(@@group.order - 1)
+      end
+
+      ## Gets private key from ENV variable or local FS
+      #
+      def self.get_local_private_key
+        ENV['PRIV_KEY'] || (raise BitPayError, MISSING_KEY)
+        # TODO: add a file-system option at ~/.bitpay/api.key
       end
       
-      def self.get_public_key(private_key_hex=(ENV['PRIV_KEY'] || (raise BitPayError, MISSING_KEY)) ) # TODO: maybe add a file-system option too?
+      def self.get_public_key(private_key_hex=get_local_private_key) 
         private_key = private_key_hex.to_i(16)
         public_key = @@group.generator.multiply_by_scalar(private_key)
         public_key_string_compressed = ECDSA::Format::PointOctetString.encode(public_key, compression:true)
@@ -25,7 +32,7 @@ module BitPay
       end
   
       ## Generates a SIN from private key
-      def self.get_sin(private_key_hex=ENV['PRIV_KEY'] || (raise BitPayError, MISSING_KEY) ) # TODO: maybe add a file-system option too?
+      def self.get_sin(private_key_hex=get_local_private_key)
         #http://blog.bitpay.com/2014/07/01/bitauth-for-decentralized-authentication.html
         #https://en.bitcoin.it/wiki/Identity_protocol_v1
   

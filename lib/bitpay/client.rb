@@ -83,14 +83,14 @@ module BitPay
 
     ## Provided for legacy compatibility with old library
     #
-    def get(path)
-      send_request("GET", path)
+    def get(path, facade="pos")
+      send_request("GET", path, facade)
     end
 
     ## Provided for legacy compatibility with old library
     #
-    def post(path, params={})
-      send_request("POST", path, 'merchant', params)
+    def post(path, params={}, facade="pos")
+      send_request("POST", path, facade, params)
     end
 
 ##### PRIVATE METHODS #####
@@ -112,7 +112,7 @@ module BitPay
       response = @https.request request
 
       # /tokens returns an array of hashes.  Let's turn it into a more useful single hash
-      token_array = JSON.parse(response.body)["data"]
+      token_array = JSON.parse(response.body)["data"] || {}
 
       tokens = {}
       token_array.each do |t|

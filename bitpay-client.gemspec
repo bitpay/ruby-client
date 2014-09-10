@@ -9,9 +9,11 @@ Gem::Specification.new do |s|
   s.description = 'Powerful, flexible, lightweight, thread-safe interface to the BitPay developers API'
 
   s.files = `git ls-files`.split("\n")
-  s.require_paths = %w[lib]
+  s.require_paths = ["lib"]
   s.rubyforge_project = s.name
   s.required_rubygems_version = '>= 1.3.4'
+  s.bindir        = 'bin'
+  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
 
   s.add_dependency 'json'
   s.add_dependency 'rack',    '>= 0'
@@ -19,9 +21,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'commander'
 
   s.add_development_dependency 'rake'
-  s.add_development_dependency 'minitest'
   s.add_development_dependency 'webmock'
-  s.add_development_dependency 'yard'
   s.add_development_dependency 'pry'
   s.add_development_dependency 'rspec'
 end

@@ -1,7 +1,11 @@
+require 'uri'
+require 'net/https'
 require 'json'
 require 'ecdsa'
 require 'securerandom'
 require 'digest/sha2'
+require 'cgi'
+require 'pry'
 
 module BitPay
   class KeyUtils
@@ -74,6 +78,19 @@ module BitPay
         return step_seven
         
       end
+
+    ## Generates a registration request URL
+    #
+    def self.generate_registration_url(uri,label,facade,sin)
+      #https://test.bitpay.com/api-access-request?label=node-bitpay-client-HamPay.local&id=Tezeb3ToLu2tVnAhQED8FENDgVkHp4RKXBj&facade=merchant
+      url = uri + BitPay::CLIENT_REGISTRATION_PATH + 
+           "?label=" + CGI::escape(label) +
+           "&id=" + sin +
+           "&facade=" + facade
+
+      return url
+      
+    end
       
       ## Generate ECDSA signature
       #

@@ -12,6 +12,7 @@ module BitPay
   # Location of API
   API_URI = 'https://bitpay.com'
   TEST_API_URI = 'https://test.bitpay.com'
+  CLIENT_REGISTRATION_PATH = '/api-access-request'
 
   # User agent reported to API
   USER_AGENT = 'ruby-bitpay-client '+VERSION

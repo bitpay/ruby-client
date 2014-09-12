@@ -37,19 +37,19 @@ describe BitPay::KeyUtils do
     
   end
 
-  describe '.get_sin' do
+  describe '.get_client_id' do
     
-    it 'should generate a proper SIN' do
-      expect(key_utils.get_sin(PRIV_KEY)).to eq(SIN)
+    it 'should generate a proper Client ID' do
+      expect(key_utils.get_client_id(PRIV_KEY)).to eq(CLIENT_ID)
     end
     
     it 'should get priv_key from the env if none is passed' do
       stub_const('ENV', {'PRIV_KEY' => PRIV_KEY})
-      expect(key_utils.get_sin).to eq(SIN)
+      expect(key_utils.get_client_id).to eq(CLIENT_ID)
     end
     
     it 'should throw an error if no priv_key is provided' do
-      expect{key_utils.get_sin}.to raise_error(BitPay::BitPayError)
+      expect{key_utils.get_client_id}.to raise_error(BitPay::BitPayError)
     end
 
   end

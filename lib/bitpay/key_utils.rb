@@ -35,8 +35,8 @@ module BitPay
         public_key_string_compressed.unpack("H*").first
       end
   
-      ## Generates a SIN from private key
-      def self.get_sin(private_key_hex=get_local_private_key)
+      ## Generates a Client ID from private key
+      def self.get_client_id(private_key_hex=get_local_private_key)
         #http://blog.bitpay.com/2014/07/01/bitauth-for-decentralized-authentication.html
         #https://en.bitcoin.it/wiki/Identity_protocol_v1
   
@@ -81,11 +81,11 @@ module BitPay
 
     ## Generates a registration request URL
     #
-    def self.generate_registration_url(uri,label,facade,sin)
+    def self.generate_registration_url(uri,label,facade,client_id)
       #https://test.bitpay.com/api-access-request?label=node-bitpay-client-HamPay.local&id=Tezeb3ToLu2tVnAhQED8FENDgVkHp4RKXBj&facade=merchant
       url = uri + BitPay::CLIENT_REGISTRATION_PATH + 
            "?label=" + CGI::escape(label) +
-           "&id=" + sin +
+           "&id=" + client_id +
            "&facade=" + facade
 
       return url

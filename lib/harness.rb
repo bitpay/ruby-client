@@ -7,7 +7,7 @@ require_relative 'bitpay/key_utils.rb'
 ENV["PRIV_KEY"] = "16d7c3508ec59773e71ae728d29f41fcf5d1f380c379b99d68fa9f552ce3ebc3"
 puts "privkey: #{ENV['PRIV_KEY']}"
 puts "target SIN: TfFVQhy2hQvchv4VVG4c7j4XPa2viJ9HrR8"
-puts "Derived SIN: #{BitPay::KeyUtils.get_sin}"
+puts "Derived SIN: #{BitPay::KeyUtils.get_client_id}"
 
 puts "\n\n------------------\n\n"
 
@@ -15,9 +15,9 @@ uri = "https://localhost:8088"
 #name = "Ridonculous.label That shouldn't work really"
 name = "somethinginnocuous"
 facade = "pos"
-sin = BitPay::KeyUtils.get_sin
+client_id = BitPay::KeyUtils.get_client_id
 
-BitPay::KeyUtils.generate_registration_url(uri,name,facade,sin)
+BitPay::KeyUtils.generate_registration_url(uri,name,facade,client_id)
 
 puts "\n\n------------------\n\n"
 

@@ -23,7 +23,7 @@ module BitPay
       # TODO:  Think about best way to store keys
       @priv_key          = opts[:priv_key] || ENV['PRIV_KEY'] || (raise BitPayError, MISSING_KEY)
       @pub_key           = KeyUtils.get_public_key(@priv_key)
-      @SIN               = KeyUtils.get_sin(@priv_key)
+      @client_id         = KeyUtils.get_client_id(@priv_key)
       @uri               = URI.parse opts[:api_uri] || API_URI
       @user_agent        = opts[:user_agent] || USER_AGENT
       @https             = Net::HTTP.new @uri.host, @uri.port

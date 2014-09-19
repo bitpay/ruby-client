@@ -49,7 +49,10 @@ command :register_client do |c|
         q.validate = lambda { |url| url =~ /\A#{URI::regexp(['http', 'https'])}\z/}
         q.responses[:not_valid] = "Please provide a valid URL"
       end
-      options.label = ask("Label for client?  ") {|q| q.default = options.label}
+      options.label = ask("Label for client?  ") do |q|
+        q.default = options.label
+        #TODO: Validate that label matches regex: ^[a-zA-Z0-9 \-\_]+$
+      end
       options.facade = ask("Which facade?  ") {|q| q.default = options.facade; q.in = %w[root admin client finance merchant ops payroll pos support user]}
       options.client_id = ask("Client ID to register?  ") {|q| q.default = options.client_id}
     end  

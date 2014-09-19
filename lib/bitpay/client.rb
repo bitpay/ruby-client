@@ -37,11 +37,7 @@ module BitPay
     #  # Get an invoice:
     #  existing_invoice = client.get 'invoice/YOUR_INVOICE_ID'
     def get(path)
-      request = Net::HTTP::Get.new @uri.path+'/'+path
-      request.basic_auth @api_key, ''
-      request['User-Agent'] = USER_AGENT
-      response = @https.request request
-      JSON.parse response.body
+      request(Net::HTTP::Get, path)
     end
 
     # Makes a POST call to the BitPay API.
@@ -50,15 +46,27 @@ module BitPay
     #  # Create an invoice:
     #  created_invoice = client.post 'invoice', {:price => 1.45, :currency => 'BTC'}
     def post(path, params={})
+      request(Net::HTTP::Post, path, params)
+    end
 
-      request = Net::HTTP::Post.new @uri.path+'/'+path
-      request.basic_auth @api_key, ''
-      request['User-Agent'] = USER_AGENT
-      request['Content-Type'] = 'application/json'
-      request['X-BitPay-Plugin-Info'] = 'Rubylib' + VERSION
-      request.body = params.to_json
-      response = @https.request request
-      JSON.parse response.body
+    private
+
+    def request(request_klass, path, params=nil)
+      request  = make_request(request_klass, path, params)
+      response = @https.request(request)
+      return JSON.parse(response.body)
+    rescue => e
+      fail BitPayError, "Bitpay Request Error: #{e}"
+    end
+
+    def make_request(request_klass, path, params)
+      request_klass.new(@uri.path + '/' + path).tap do |r|
+        r.basic_auth @api_key, ''
+        r['User-Agent']           = USER_AGENT
+        r['Content-Type']         = 'application/json'
+        r['X-BitPay-Plugin-Info'] = 'Rubylib' + VERSION
+        r.body = params.to_json if params
+      end
     end
   end
 end

@@ -5,7 +5,7 @@ describe BitPay::KeyUtils do
 
   describe '.generate_private_key' do
     it 'should return a 256-bit number' do
-      expect(key_utils.generate_private_key.to_s(2).length).to be <= 256
+      expect(key_utils.generate_private_key.to_i(16).to_s(2).length).to be <= 256
     end
   end
 
@@ -15,8 +15,12 @@ describe BitPay::KeyUtils do
       expect(key_utils.get_local_private_key).to eq(PRIV_KEY)
     end
     
-    it 'should get the key from ~/.bitpay/api.key if env variable is not set'
+    it 'should get the key from ~/.bitpay/api.key if env variable is not set' do
+      File.stub(:read).with(BitPay::PRIVATE_KEY_PATH) {PRIV_KEY}
+      expect(key_utils.get_local_private_key).to eq(PRIV_KEY)
+    end
     it 'should throw an exception if no local key can be found' do
+      File.stub(:read).with(BitPay::PRIVATE_KEY_PATH) {nil}
       expect{key_utils.get_local_private_key}.to raise_error(BitPay::BitPayError)
     end
   end
@@ -32,6 +36,7 @@ describe BitPay::KeyUtils do
     end
       
     it 'should throw an error if no priv_key is provided' do
+      File.stub(:read).with(BitPay::PRIVATE_KEY_PATH) {nil}
       expect {key_utils.get_public_key}.to raise_error(BitPay::BitPayError)
     end
     
@@ -49,6 +54,7 @@ describe BitPay::KeyUtils do
     end
     
     it 'should throw an error if no priv_key is provided' do
+      File.stub(:read).with(BitPay::PRIVATE_KEY_PATH) {nil}
       expect{key_utils.get_client_id}.to raise_error(BitPay::BitPayError)
     end
 

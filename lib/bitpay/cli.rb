@@ -19,17 +19,29 @@ command :register_client do |c|
   c.option '--label <label>', "The desired label for the client on the BitPay merchant interface (default HOSTNAME)"
   c.option '--facade <facade>', "The facade to which the client is requesting permission (default 'pos')"
   c.option '--new_key', "Generate a new keypair before registering"
-  c.option '--client_id <client_id>', "specify explicit client_id to register"
+  c.option '--client_id <client_id>', "specify explicit Client ID to register"
   
   c.example "Register a new POS client with the BitPay test environment", "bitpay register_client --uri 'https://test.bitpay.com'"\
     "--label 'My test client' --new_key"  
   
   c.action do |args, options|
+    
     options.default \
       :uri => "https://bitpay.com",
-      :label => "hostname", #TODO: replace this with actual hostname if possible
+      :label => ENV["HOSTNAME"] || "BitPay Ruby Client",
       :facade => "pos",
-      :client_id => BitPay::KeyUtils.get_client_id
+      :client_id => 
+        if options.new_key
+          BitPay::KeyUtils.get_client_id(BitPay::KeyUtils.generate_private_key)
+        else
+          begin
+            BitPay::KeyUtils.get_client_id
+          rescue
+            puts "No existing key found.  Please specify the --new_key option"
+            exit 1
+          end
+        end
+    
     
     unless options.silent   
       options.uri = ask("URI for BitPay Environment?  ") do |q|
@@ -38,7 +50,7 @@ command :register_client do |c|
         q.responses[:not_valid] = "Please provide a valid URL"
       end
       options.label = ask("Label for client?  ") {|q| q.default = options.label}
-      options.facade = ask("Which facade?  ") {|q| q.default = options.facade; q.in = %w[admin client finance merchant ops payroll pos support user]}
+      options.facade = ask("Which facade?  ") {|q| q.default = options.facade; q.in = %w[root admin client finance merchant ops payroll pos support user]}
       options.client_id = ask("Client ID to register?  ") {|q| q.default = options.client_id}
     end  
 

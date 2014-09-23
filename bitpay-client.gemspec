@@ -12,6 +12,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.rubyforge_project = s.name
   s.required_rubygems_version = '>= 1.3.4'
+  s.required_ruby_version = '~> 2'
   s.bindir        = 'bin'
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
 
@@ -26,5 +27,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'pry-byebug'
   s.add_development_dependency 'capybara'
   s.add_development_dependency 'poltergeist'
+  s.add_development_dependency 'airborne'
   s.add_development_dependency 'rspec'
 end

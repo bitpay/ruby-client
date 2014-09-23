@@ -40,8 +40,22 @@ module BitPay
       load_tokens      
     end
 
+    def pair_pos_client(claimCode)
+      params = {pairingCode: claimCode}
+      urlpath = '/tokens'
+      request = Net::HTTP::Post.new urlpath
+      params[:guid] = SecureRandom.uuid
+      params[:id] = @client_id
+      request.body = params.to_json
+      request['User-Agent'] = @user_agent
+      request['Content-Type'] = 'application/json'
+      request['X-BitPay-Plugin-Info'] = 'Rubylib' + VERSION
+      response = @https.request request
+      JSON.parse response.body
+    end
+
     ## Generates REST request to api endpoint
-    def send_request(verb, path, facade='merchant', params={})
+    def send_request(verb, path, facade: 'merchant', params: {})
       token = @tokens[facade] || raise(BitPayError, "No token for specified facade: #{facade}")
 
       # Verb-specific logic
@@ -60,6 +74,7 @@ module BitPay
           params[:token] = token
           params[:nonce] = KeyUtils.nonce
           params[:guid]  = SecureRandom.uuid
+          params[:id] = @client_id
           request.body = params.to_json
           request['X-Signature'] = KeyUtils.sign(@uri.to_s + urlpath + request.body, @priv_key)
 
@@ -84,13 +99,13 @@ module BitPay
     ## Provided for legacy compatibility with old library
     #
     def get(path, facade="pos")
-      send_request("GET", path, facade)
+      send_request("GET", path, facade: facade)
     end
 
     ## Provided for legacy compatibility with old library
     #
     def post(path, params={}, facade="pos")
-      send_request("POST", path, facade, params)
+      send_request("POST", path, facade: facade, params: params)
     end
 
 ##### PRIVATE METHODS #####

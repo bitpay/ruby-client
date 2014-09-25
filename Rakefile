@@ -2,6 +2,7 @@ require "bundler/gem_tasks"
 require 'rspec/core/rake_task'
 require 'capybara'
 require 'capybara/poltergeist'
+require 'mongo'
 
 require_relative 'config/constants.rb'
 require_relative 'config/capybara.rb'
@@ -14,6 +15,7 @@ desc "Bitpay Tasks"
 namespace :bitpay do
   desc "Clear all claim codes from the test server."
   task :clear_claim_codes do
+    puts "clearing claim codes"
     Capybara.visit ROOT_ADDRESS
     Capybara.click_link('Login')
     Capybara.fill_in 'email', :with => TEST_USER
@@ -29,9 +31,21 @@ namespace :bitpay do
       Capybara.page.go_back
       Capybara.click_link "API Tokens", match: :first
     end
+    puts "claim codes cleared"
   end
 
-  desc "Run specs and clear claim codes."
-  task :spec_clear => ['spec', 'clear_claim_codes']
+  desc "Clear rate limiters from local mongo host"
+
+  task :clear_rate_limiters do
+    puts "clearing rate limiters"
+    client = Mongo::MongoClient.new
+    db     = client['bitpay-dev']
+    coll   = db['ratelimiters']
+    coll.remove()
+    puts "rate limiters cleared"
+  end
+
+  desc "Run specs and clear claim codes and rate_limiters."
+  task :spec_clear => ['spec', 'clear_claim_codes', 'clear_rate_limiters']
 
 end

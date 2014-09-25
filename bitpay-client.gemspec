@@ -25,8 +25,10 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'webmock'
   s.add_development_dependency 'pry'
   s.add_development_dependency 'pry-byebug'
+  s.add_development_dependency 'pry-rescue'
   s.add_development_dependency 'capybara'
   s.add_development_dependency 'poltergeist'
   s.add_development_dependency 'airborne'
   s.add_development_dependency 'rspec'
+  s.add_development_dependency 'mongo'
 end

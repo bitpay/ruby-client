@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.rubyforge_project = s.name
   s.required_rubygems_version = '>= 1.3.4'
-  s.required_ruby_version = '~> 2'
+  s.required_ruby_version = '~> 2.1'
   s.bindir        = 'bin'
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
 

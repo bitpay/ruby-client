@@ -41,22 +41,32 @@ module BitPay
     end
 
     def pair_pos_client(claimCode)
-      params = {pairingCode: claimCode}
-      urlpath = '/tokens'
-      request = Net::HTTP::Post.new urlpath
-      params[:guid] = SecureRandom.uuid
-      params[:id] = @client_id
-      request.body = params.to_json
-      request['User-Agent'] = @user_agent
-      request['Content-Type'] = 'application/json'
-      request['X-BitPay-Plugin-Info'] = 'Rubylib' + VERSION
-      response = @https.request request
-      JSON.parse response.body
+      response = set_pos_token(claimCode)
+      case response.code
+      when "200"
+        get_token 'pos'
+      when "500"
+        raise BitPayError, JSON.parse(response.body)["error"]
+      else
+        raise BitPayError, "#{response.code}: #{JSON.parse(response.body)}"
+      end
+      response
     end
 
+    def create_invoice(id:, price:, currency:, facade: 'pos')
+      response = send_request("POST", "invoices", facade: facade, params: {price: price, currency: currency})
+      response["data"]
+    end
+
+    def get_public_invoice(id:)
+      request = Net::HTTP::Get.new("/invoices/#{id}")
+      response = @https.request request
+      (JSON.parse response.body)["data"]
+    end
+    
     ## Generates REST request to api endpoint
-    def send_request(verb, path, facade: 'merchant', params: {})
-      token = @tokens[facade] || raise(BitPayError, "No token for specified facade: #{facade}")
+    def send_request(verb, path, facade: 'merchant', params: {}, token: nil)
+      token ||= @tokens[facade] || raise(BitPayError, "No token for specified facade: #{facade}")
 
       # Verb-specific logic
       case verb.upcase
@@ -91,7 +101,6 @@ module BitPay
  
       response = @https.request request
       JSON.parse response.body
-
     end
 
 ##### COMPATIBILITY METHODS #####
@@ -140,6 +149,19 @@ module BitPay
     end
 
     ## Retrieves specified token from hash, otherwise tries to refresh @tokens and retry
+    def set_pos_token(claim_code)
+      params = {pairingCode: claim_code}
+      urlpath = '/tokens'
+      request = Net::HTTP::Post.new urlpath
+      params[:guid] = SecureRandom.uuid
+      params[:id] = @client_id
+      request.body = params.to_json
+      request['User-Agent'] = @user_agent
+      request['Content-Type'] = 'application/json'
+      request['X-BitPay-Plugin-Info'] = 'Rubylib' + VERSION
+      @https.request request
+    end
+
     def get_token(facade)
       token = @tokens[facade] || load_tokens[facade] || raise(BitPayError, "Not authorized for facade: #{facade}")
     end

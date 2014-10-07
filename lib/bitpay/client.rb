@@ -1,3 +1,7 @@
+# license Copyright 2011-2014 BitPay, Inc., MIT License
+# see http://opensource.org/licenses/MIT
+# or https://github.com/bitpay/php-bitpay-client/blob/master/LICENSE
+
 require 'uri'
 require 'net/https'
 require 'json'
@@ -7,23 +11,19 @@ require_relative 'key_utils'
 module BitPay
   # This class is used to instantiate a BitPay Client object. It is expected to be thread safe.
   #
-  # @example
-  #  # Create a client with your BitPay API key (obtained from the BitPay API access page at BitPay.com):
-  #  client = BitPay::Client.new 'YOUR_API_KEY'
   class Client
     
 
-    # Creates a BitPay Client object. The second parameter is a hash for overriding defaults.
-    #
     # @return [Client]
     # @example
-    #  # Create a client with your BitPay API key (obtained from the BitPay API access page at BitPay.com):
-    #  client = BitPay::Client.new 'YOUR_API_KEY'
+    #  # Create a client with a pem file created by the bitpay client:
+    #  client = BitPay::Client.new
     def initialize(opts={})
-      # TODO:  Think about best way to store keys
-      @priv_key          = opts[:priv_key] || ENV['PRIV_KEY'] || (raise BitPayError, MISSING_KEY)
-      @pub_key           = KeyUtils.get_public_key(@priv_key)
-      @client_id         = KeyUtils.get_client_id(@priv_key)
+      @pem               = opts[:pem] || ENV['BITPAY_PEM'] || KeyUtils.retrieve_or_generate_pem 
+      @key               = KeyUtils.create_key @pem
+      @priv_key          = KeyUtils.get_private_key @key
+      @pub_key           = KeyUtils.get_public_key @key
+      @client_id         = KeyUtils.generate_sin_from_pem @pem
       @uri               = URI.parse opts[:api_uri] || API_URI
       @user_agent        = opts[:user_agent] || USER_AGENT
       @https             = Net::HTTP.new @uri.host, @uri.port
@@ -40,9 +40,34 @@ module BitPay
       load_tokens      
     end
 
+    def pair_pos_client(claimCode)
+      response = set_pos_token(claimCode)
+      case response.code
+      when "200"
+        get_token 'pos'
+      when "500"
+        raise BitPayError, JSON.parse(response.body)["error"]
+      else
+        raise BitPayError, "#{response.code}: #{JSON.parse(response.body)}"
+      end
+      response
+    end
+
+    def create_invoice(id:, price:, currency:, facade: 'pos', params:{})
+      params.merge!({price: price, currency: currency})
+      response = send_request("POST", "invoices", facade: facade, params: params)
+      response["data"]
+    end
+
+    def get_public_invoice(id:)
+      request = Net::HTTP::Get.new("/invoices/#{id}")
+      response = @https.request request
+      (JSON.parse response.body)["data"]
+    end
+    
     ## Generates REST request to api endpoint
-    def send_request(verb, path, facade='merchant', params={})
-      token = @tokens[facade] || raise(BitPayError, "No token for specified facade: #{facade}")
+    def send_request(verb, path, facade: 'merchant', params: {}, token: nil)
+      token ||= @tokens[facade] || raise(BitPayError, "No token for specified facade: #{facade}")
 
       # Verb-specific logic
       case verb.upcase
@@ -60,11 +85,12 @@ module BitPay
           params[:token] = token
           params[:nonce] = KeyUtils.nonce
           params[:guid]  = SecureRandom.uuid
+          params[:id] = @client_id
           request.body = params.to_json
           request['X-Signature'] = KeyUtils.sign(@uri.to_s + urlpath + request.body, @priv_key)
 
         when "DELETE"
-        else 
+       
           raise(BitPayError, "Invalid HTTP verb: #{verb.upcase}")
       end
 
@@ -76,21 +102,6 @@ module BitPay
  
       response = @https.request request
       JSON.parse response.body
-
-    end
-
-##### COMPATIBILITY METHODS #####
-
-    ## Provided for legacy compatibility with old library
-    #
-    def get(path, facade="pos")
-      send_request("GET", path, facade)
-    end
-
-    ## Provided for legacy compatibility with old library
-    #
-    def post(path, params={}, facade="pos")
-      send_request("POST", path, facade, params)
     end
 
 ##### PRIVATE METHODS #####
@@ -125,6 +136,19 @@ module BitPay
     end
 
     ## Retrieves specified token from hash, otherwise tries to refresh @tokens and retry
+    def set_pos_token(claim_code)
+      params = {pairingCode: claim_code}
+      urlpath = '/tokens'
+      request = Net::HTTP::Post.new urlpath
+      params[:guid] = SecureRandom.uuid
+      params[:id] = @client_id
+      request.body = params.to_json
+      request['User-Agent'] = @user_agent
+      request['Content-Type'] = 'application/json'
+      request['X-BitPay-Plugin-Info'] = 'Rubylib' + VERSION
+      @https.request request
+    end
+
     def get_token(facade)
       token = @tokens[facade] || load_tokens[facade] || raise(BitPayError, "Not authorized for facade: #{facade}")
     end

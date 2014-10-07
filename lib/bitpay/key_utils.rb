@@ -1,6 +1,11 @@
+# license Copyright 2011-2014 BitPay, Inc., MIT License
+# see http://opensource.org/licenses/MIT
+# or https://github.com/bitpay/php-bitpay-client/blob/master/LICENSE
+
 require 'uri'
 require 'net/https'
 require 'json'
+require 'openssl'
 require 'ecdsa'
 require 'securerandom'
 require 'digest/sha2'
@@ -8,9 +13,6 @@ require 'cgi'
 
 module BitPay
   class KeyUtils
-    
-    @@group = ECDSA::Group::Secp256k1
-
     class << self
       def nonce
         Time.now.utc.strftime('%Y%m%d%H%M%S%L')
@@ -18,29 +20,64 @@ module BitPay
 
       ## Generates a new private key and writes to local FS
       #
-      def generate_private_key
-        private_key_hex = (1 + SecureRandom.random_number(@@group.order - 1)).to_s(16)
-        FileUtils.mkdir_p(BITPAY_CREDENTIALS_DIR)
-        File.open(PRIVATE_KEY_PATH, 'w') { |file| file.write(private_key_hex) }
-        return private_key_hex
+      def retrieve_or_generate_pem
+        begin
+          pem = get_local_pem_file
+        rescue
+          pem = generate_pem
+        end
+        pem
       end
 
+      def generate_pem
+        key = OpenSSL::PKey::EC.new("secp256k1")
+        key.generate_key
+        write_pem_file(key)
+        key.to_pem
+      end
+
+      def create_key pem
+        OpenSSL::PKey::EC.new(pem)
+      end
+
+      def create_new_key
+        key = OpenSSL::PKey::EC.new("secp256k1")
+        key.generate_key
+        key
+      end
+
+      def write_pem_file key
+        FileUtils.mkdir_p(BITPAY_CREDENTIALS_DIR)
+        File.open(PRIVATE_KEY_PATH, 'w') { |file| file.write(key.to_pem) }
+      end
       ## Gets private key from ENV variable or local FS
       #
-      def get_local_private_key
-        ENV['PRIV_KEY'] || File.read(PRIVATE_KEY_PATH) || (raise BitPayError, MISSING_KEY)
+      def get_local_pem_file
+        ENV['BITPAY_PEM'] || File.read(PRIVATE_KEY_PATH) || (raise BitPayError, MISSING_KEY)
       end
     
-      def get_public_key(private_key_hex=get_local_private_key) 
-        private_key = private_key_hex.to_i(16)
-        public_key = @@group.generator.multiply_by_scalar(private_key)
-        public_key_string_compressed = ECDSA::Format::PointOctetString.encode(public_key, compression:true)
-        # Return Hex string
-        public_key_string_compressed.unpack("H*").first
+      def get_private_key key
+        key.private_key.to_int.to_s(16)
       end
 
-    ## Generates a Client ID from private key
-      def get_client_id(private_key_hex=get_local_private_key)
+      def get_public_key key 
+        key.public_key.group.point_conversion_form = :compressed
+        key.public_key.to_bn.to_s(16).downcase
+      end
+
+      def get_private_key_from_pem pem
+        raise BitPayError, MISSING_KEY unless pem
+        key = OpenSSL::PKey::EC.new(pem)
+        get_private_key key
+      end
+
+      def get_public_key_from_pem pem
+        raise BitPayError, MISSING_KEY unless pem
+        key = OpenSSL::PKey::EC.new(pem)
+        get_public_key key
+      end
+
+      def generate_sin_from_pem(pem = nil)
         #http://blog.bitpay.com/2014/07/01/bitauth-for-decentralized-authentication.html
         #https://en.bitcoin.it/wiki/Identity_protocol_v1
 
@@ -48,54 +85,23 @@ module BitPay
         # hence the requirement to use [].pack("H*") to convert to binary for each step
         
         #Generate Private Key
-        public_key  = [get_public_key(private_key_hex)].pack("H*")
-        
-        # Step 1: SHA-256 of Public Key
+        key = pem.nil? ? get_local_pem_file : OpenSSL::PKey::EC.new(pem)
+        key.public_key.group.point_conversion_form = :compressed
+        public_key = key.public_key.to_bn.to_s(2)
         step_one = Digest::SHA256.hexdigest(public_key)
-        #puts "step_one: #{step_one}"
-
-        # Step 2: RIPEMD-160 of Step 1
         step_two = Digest::RMD160.hexdigest([step_one].pack("H*")) 
-        #puts "step_two #{step_two}"
-
-        # Step 3: Version + SIN TYPE + Step 2
         step_three = "0F02" + step_two
-        #puts "step_three: #{step_three}"
-
-        # Step 4: Double SHA-256 of Step 3
-        step_four = Digest::SHA256.hexdigest([Digest::SHA256.hexdigest([step_three].pack("H*"))].pack("H*"))
-        #puts "step_four: #{step_four}"
-
-        # Step 5: Checksum (first 8 chars)
+        step_four_a = Digest::SHA256.hexdigest([step_three].pack("H*"))
+        step_four = Digest::SHA256.hexdigest([step_four_a].pack("H*"))
         step_five = step_four[0..7]
-        #puts "step_five: #{step_five}"
-
-        # Step 6: Step 3 + Step 5
         step_six = step_three + step_five
-        #puts "step_six: #{step_six}"
-
-        # Step 7: Base58 Encode
-        step_seven = encode_base58(step_six)
-        #puts "step_seven: #{step_seven}"
-
-        # Return the SIN
-        return step_seven
-      end
-
-    ## Generates a registration request URL
-    #
-      def generate_registration_url(uri,label,facade,client_id)
-        #https://test.bitpay.com/api-access-request?label=node-bitpay-client-HamPay.local&id=Tezeb3ToLu2tVnAhQED8FENDgVkHp4RKXBj&facade=merchant
-        url = uri + BitPay::CLIENT_REGISTRATION_PATH + 
-             "?label=" + CGI::escape(label) +
-             "&id=" + client_id +
-             "&facade=" + facade
-
-        return url
+        encode_base58(step_six)
       end
       
+      
     ## Generate ECDSA signature
-    #
+    #  This is the last method that requires the ecdsa gem, which we would like to replace
+
       def sign(message, privkey)
         group = ECDSA::Group::Secp256k1
         digest = Digest::SHA256.digest(message)

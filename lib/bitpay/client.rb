@@ -103,20 +103,6 @@ module BitPay
       JSON.parse response.body
     end
 
-##### COMPATIBILITY METHODS #####
-
-    ## Provided for legacy compatibility with old library
-    #
-    def get(path, facade="pos")
-      send_request("GET", path, facade: facade)
-    end
-
-    ## Provided for legacy compatibility with old library
-    #
-    def post(path, params={}, facade="pos")
-      send_request("POST", path, facade: facade, params: params)
-    end
-
 ##### PRIVATE METHODS #####
     private
 

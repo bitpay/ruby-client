@@ -2,6 +2,7 @@ require './lib/bitpay/version.rb'
 Gem::Specification.new do |s|
   s.name = 'bitpay-client'
   s.version = BitPay::VERSION
+  s.licenses = ['MIT']
   s.authors = 'Bitpay, Inc.'
   s.email = 'info@bitpay.com'
   s.homepage = 'https://github.com/bitpay/ruby-client'

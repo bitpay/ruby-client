@@ -13,6 +13,7 @@ task :default => :spec
 
 desc "Bitpay Tasks"
 namespace :bitpay do
+
   desc "Clear all claim codes from the test server."
   task :clear_claim_codes do
     puts "clearing claim codes"

@@ -12,8 +12,8 @@ describe "pairing a token", javascript: true, type: :feature do
     find(".token-access-new-button").find(".btn").click
     find(".token-claimcode", match: :first).text
   end
-  let(:private_key) { BitPay::KeyUtils.generate_private_key }
-  let(:client) { BitPay::Client.new(api_uri: ROOT_ADDRESS, priv_key: private_key, insecure: true) }
+  let(:pem) { BitPay::KeyUtils.generate_pem }
+  let(:client) { BitPay::Client.new(api_uri: ROOT_ADDRESS, pem: pem, insecure: true) }
 
   context "pairing an unpaired client" do
     it "should have no tokens before pairing" do

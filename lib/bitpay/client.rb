@@ -7,23 +7,19 @@ require_relative 'key_utils'
 module BitPay
   # This class is used to instantiate a BitPay Client object. It is expected to be thread safe.
   #
-  # @example
-  #  # Create a client with your BitPay API key (obtained from the BitPay API access page at BitPay.com):
-  #  client = BitPay::Client.new 'YOUR_API_KEY'
   class Client
     
 
-    # Creates a BitPay Client object. The second parameter is a hash for overriding defaults.
-    #
     # @return [Client]
     # @example
-    #  # Create a client with your BitPay API key (obtained from the BitPay API access page at BitPay.com):
-    #  client = BitPay::Client.new 'YOUR_API_KEY'
+    #  # Create a client with a pem file created by the bitpay client:
+    #  client = BitPay::Client.new
     def initialize(opts={})
-      # TODO:  Think about best way to store keys
-      @priv_key          = opts[:priv_key] || ENV['PRIV_KEY'] || (raise BitPayError, MISSING_KEY)
-      @pub_key           = KeyUtils.get_public_key(@priv_key)
-      @client_id         = KeyUtils.get_client_id(@priv_key)
+      @pem               = opts[:pem] || ENV['BITPAY_PEM'] || KeyUtils.generate_pem 
+      @key               = KeyUtils.create_key @pem
+      @priv_key          = KeyUtils.get_private_key @key
+      @pub_key           = KeyUtils.get_public_key @key
+      @client_id         = KeyUtils.generate_sin_from_pem @pem
       @uri               = URI.parse opts[:api_uri] || API_URI
       @user_agent        = opts[:user_agent] || USER_AGENT
       @https             = Net::HTTP.new @uri.host, @uri.port
@@ -89,7 +85,7 @@ module BitPay
           request['X-Signature'] = KeyUtils.sign(@uri.to_s + urlpath + request.body, @priv_key)
 
         when "DELETE"
-        else 
+       
           raise(BitPayError, "Invalid HTTP verb: #{verb.upcase}")
       end
 

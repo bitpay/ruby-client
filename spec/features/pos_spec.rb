@@ -16,7 +16,7 @@ describe "create an invoice", javascript: true, type: :feature do
     }
     set_client = -> {
       private_key =  BitPay::KeyUtils.generate_private_key
-      client = BitPay::Client.new(api_uri: ROOT_ADDRESS, priv_key: private_key, insecure: true)
+      client = BitPay::Client.new(api_uri: ROOT_ADDRESS, pem: PEM, insecure: true)
       client.pair_pos_client(get_claim_code.call)
       client
     }

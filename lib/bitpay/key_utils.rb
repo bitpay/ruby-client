@@ -28,15 +28,10 @@ module BitPay
       end
 
       def generate_pem
-        begin
-          pem = File.open(PRIVATE_KEY_PATH, 'r').read
-        rescue
-          key = OpenSSL::PKey::EC.new("secp256k1")
-          key.generate_key
-          write_pem_file(key)
-          pem = key.to_pem
-        end
-        pem
+        key = OpenSSL::PKey::EC.new("secp256k1")
+        key.generate_key
+        write_pem_file(key)
+        key.to_pem
       end
 
       def create_key pem
@@ -68,13 +63,19 @@ module BitPay
         key.public_key.to_bn.to_s(16).downcase
       end
 
+      def get_private_key_from_pem pem
+        raise BitPayError, MISSING_KEY unless pem
+        key = OpenSSL::PKey::EC.new(pem)
+        get_private_key key
+      end
+
       def get_public_key_from_pem pem
         raise BitPayError, MISSING_KEY unless pem
         key = OpenSSL::PKey::EC.new(pem)
         get_public_key key
       end
 
-      def generate_sin_from_pem(pem)
+      def generate_sin_from_pem(pem = nil)
         #http://blog.bitpay.com/2014/07/01/bitauth-for-decentralized-authentication.html
         #https://en.bitcoin.it/wiki/Identity_protocol_v1
 
@@ -82,7 +83,7 @@ module BitPay
         # hence the requirement to use [].pack("H*") to convert to binary for each step
         
         #Generate Private Key
-        key = OpenSSL::PKey::EC.new(pem)
+        key = pem.nil? ? get_local_pem_file : OpenSSL::PKey::EC.new(pem)
         key.public_key.group.point_conversion_form = :compressed
         public_key = key.public_key.to_bn.to_s(2)
         step_one = Digest::SHA256.hexdigest(public_key)

@@ -23,22 +23,14 @@ describe BitPay::KeyUtils do
   end
 
   describe '.generate_pem' do
-    it 'should write a new key to ~/.bitpay/bitpay.pem if file system is not set' do
+    it 'should write a new key to ~/.bitpay/bitpay.pem' do
       file = class_double("File").as_stubbed_const
       double = double("Object").as_null_object
-      allow(file).to receive(:open).with(BitPay::PRIVATE_KEY_PATH, 'r').and_throw(StandardError)
       allow(file).to receive(:path).with(BitPay::BITPAY_CREDENTIALS_DIR).and_return(double)
       expect(file).to receive(:open).with(BitPay::PRIVATE_KEY_PATH, 'w')
       key_utils.generate_pem
     end
 
-    it 'should read the existing key if one exists' do
-      file = class_double("File").as_stubbed_const
-      double = double("Object").as_null_object
-      allow(file).to receive(:open).with(BitPay::PRIVATE_KEY_PATH, 'r').and_return(double)
-      allow(double).to receive(:read).and_return(PEM)
-      expect(key_utils.generate_pem).to eq(PEM)
-    end
   end
   
   describe '.get_public_key_from_pem' do

@@ -3,11 +3,6 @@ require 'spec_helper'
 describe BitPay::KeyUtils do
   let(:key_utils) {BitPay::KeyUtils}
 
-  describe '.generate_private_key' do
-    it 'should return a 256-bit number' do
-      expect(key_utils.generate_private_key.to_i(16).to_s(2).length).to be <= 256
-    end
-  end
 
   describe '.get_local_private_key' do
     it "should get the key from the ENV['PRIV_KEY'] variable" do
@@ -33,6 +28,25 @@ describe BitPay::KeyUtils do
 
   end
   
+  describe '.retrieve_or_generate_pem' do
+    it 'should write a new key to ~/.bitpay/bitpay.pem if there is no existing file' do
+      file = class_double("File").as_stubbed_const
+      double = double("Object").as_null_object
+      allow(file).to receive(:read).with(BitPay::PRIVATE_KEY_PATH).and_throw(StandardError)
+      allow(file).to receive(:path).with(BitPay::BITPAY_CREDENTIALS_DIR).and_return(double)
+      expect(file).to receive(:open).with(BitPay::PRIVATE_KEY_PATH, 'w')
+      key_utils.retrieve_or_generate_pem
+    end
+
+    it 'should retrieve the pem if there is an existing file' do
+      file = class_double("File").as_stubbed_const
+      double = double("Object").as_null_object
+      allow(file).to receive(:path).with(BitPay::BITPAY_CREDENTIALS_DIR).and_return(double)
+      expect(file).to receive(:open).with(BitPay::PRIVATE_KEY_PATH, 'w')
+      key_utils.generate_pem
+    end
+  end
+
   describe '.get_public_key_from_pem' do
     it 'should generate the right public key' do
       expect(key_utils.get_public_key_from_pem(PEM)).to eq(PUB_KEY)

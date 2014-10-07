@@ -19,7 +19,7 @@ module BitPay
     #  # Create a client with a pem file created by the bitpay client:
     #  client = BitPay::Client.new
     def initialize(opts={})
-      @pem               = opts[:pem] || ENV['BITPAY_PEM'] || KeyUtils.generate_pem 
+      @pem               = opts[:pem] || ENV['BITPAY_PEM'] || KeyUtils.retrieve_or_generate_pem 
       @key               = KeyUtils.create_key @pem
       @priv_key          = KeyUtils.get_private_key @key
       @pub_key           = KeyUtils.get_public_key @key
@@ -53,8 +53,9 @@ module BitPay
       response
     end
 
-    def create_invoice(id:, price:, currency:, facade: 'pos')
-      response = send_request("POST", "invoices", facade: facade, params: {price: price, currency: currency})
+    def create_invoice(id:, price:, currency:, facade: 'pos', params:{})
+      params.merge!({price: price, currency: currency})
+      response = send_request("POST", "invoices", facade: facade, params: params)
       response["data"]
     end
 

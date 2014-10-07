@@ -20,11 +20,13 @@ module BitPay
 
       ## Generates a new private key and writes to local FS
       #
-      def generate_private_key
-        key = OpenSSL::PKey::EC.new("secp256k1")
-        key.generate_key
-        write_pem_file(key)
-        get_private_key(key)
+      def retrieve_or_generate_pem
+        begin
+          pem = get_local_pem_file
+        rescue
+          pem = generate_pem
+        end
+        pem
       end
 
       def generate_pem

@@ -13,12 +13,26 @@ Or directly:
 
     require 'bitpay'
 
+## Configuration
+
+The bitpay client creates a cryptographically secure connection to your server by pairing an API code with keys stored on your server. The library generates the keys as a .pem file, which is stored in `$HOME/.bitpay/bitpay.pem` or preferentially in an environment variable.
+
+The client will generate a key when initialized if one does not already exist.
+
 ## Basic Usage
 
-To create an invoice:
+### Pairing with Bitpay.com
 
-    client = BitPay::Client.new 'YOUR_API_KEY'
-    invoice = client.post 'invoice', {:price => 10.00, :currency => 'USD'}
+To pair with bitpay.com you need to have an approved merchant account.
+1. Login to your account
+1. Navigate to bitpay.com/api-tokens (Dashboard > My Account > API Tokens)
+1. Copy an existing pairing code or create a new token and copy the pairing code.
+1. Use the bitpay command line tool to pair with bitpay.com `bitpay pair <pairing_code>` 
+
+### To create an invoice with a paired client:
+
+    client = BitPay::Client.new 
+    invoice = client.create_invoice (id: <id>, price: <price>, currency: <currency>, facade: <facade>)
 
 With invoice creation, `price` and `currency` are the only required fields. If you are sending a customer from your website to make a purchase, setting `redirectURL` will redirect the customer to your website when the invoice is paid.
 
@@ -40,7 +54,7 @@ There are many options available when creating invoices, which are listed in the
 
 To get updated information on this invoice, make a get call with the id returned:
 
-    invoice = client.get 'invoice/DGrAEmbsXe9bavBPMJ8kuk'
+    invoice = client.get_public_invoice(DGrAEmbsXe9bavBPMJ8kuk)'
 
 ## Testnet Usage
 
@@ -48,7 +62,7 @@ During development and testing, take advantage of the [Bitcoin TestNet](https://
 
     BitPay::Client.new("myAPIKey", {api_uri: "https://test.bitpay.com/api"})
     
-Note that you will need a separate API key for `test.bitpay.com` which can be obtained by registering for a test account at https://test.bitpay.com/start
+Note that in order to pair with testnet, you will need a pairing code from test.bitpay.com and will need to use the bitpay client with the --test option.
 
 ## API Documentation
 

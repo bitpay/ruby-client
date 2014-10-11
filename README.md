@@ -23,11 +23,11 @@ The client will generate a key when initialized if one does not already exist.
 
 ### Pairing with Bitpay.com
 
-To pair with bitpay.com you need to have an approved merchant account.
-1. Login to your account
-1. Navigate to bitpay.com/api-tokens (Dashboard > My Account > API Tokens)
-1. Copy an existing pairing code or create a new token and copy the pairing code.
-1. Use the bitpay command line tool to pair with bitpay.com `bitpay pair <pairing_code>` 
+To pair with bitpay.com you need to have an approved merchant account.  
+1. Login to your account  
+2. Navigate to bitpay.com/api-tokens (Dashboard > My Account > API Tokens)  
+3. Copy an existing pairing code or create a new token and copy the pairing code.  
+4. Use the bitpay command line tool to pair with bitpay.com `bitpay pair <pairing_code>`   
 
 ### To create an invoice with a paired client:
 

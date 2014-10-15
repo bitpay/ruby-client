@@ -20,8 +20,8 @@ describe BitPay::KeyUtils do
   describe '.generate_pem' do
     it 'should write a new key to ~/.bitpay/bitpay.pem' do
       file = class_double("File").as_stubbed_const
-      double = double("Object").as_null_object
-      allow(file).to receive(:path).with(BitPay::BITPAY_CREDENTIALS_DIR).and_return(double)
+      fileutils = class_double("FileUtils").as_stubbed_const
+      allow(fileutils).to receive(:mkdir_p).with(BitPay::BITPAY_CREDENTIALS_DIR).and_return(nil)
       expect(file).to receive(:open).with(BitPay::PRIVATE_KEY_PATH, 'w')
       key_utils.generate_pem
     end
@@ -31,17 +31,17 @@ describe BitPay::KeyUtils do
   describe '.retrieve_or_generate_pem' do
     it 'should write a new key to ~/.bitpay/bitpay.pem if there is no existing file' do
       file = class_double("File").as_stubbed_const
-      double = double("Object").as_null_object
+      fileutils = class_double("FileUtils").as_stubbed_const
       allow(file).to receive(:read).with(BitPay::PRIVATE_KEY_PATH).and_throw(StandardError)
-      allow(file).to receive(:path).with(BitPay::BITPAY_CREDENTIALS_DIR).and_return(double)
+      allow(fileutils).to receive(:mkdir_p).with(BitPay::BITPAY_CREDENTIALS_DIR).and_return(nil)
       expect(file).to receive(:open).with(BitPay::PRIVATE_KEY_PATH, 'w')
       key_utils.retrieve_or_generate_pem
     end
 
     it 'should retrieve the pem if there is an existing file' do
       file = class_double("File").as_stubbed_const
-      double = double("Object").as_null_object
-      allow(file).to receive(:path).with(BitPay::BITPAY_CREDENTIALS_DIR).and_return(double)
+      fileutils = class_double("FileUtils").as_stubbed_const
+      allow(fileutils).to receive(:mkdir_p).with(BitPay::BITPAY_CREDENTIALS_DIR).and_return(nil)
       expect(file).to receive(:open).with(BitPay::PRIVATE_KEY_PATH, 'w')
       key_utils.generate_pem
     end

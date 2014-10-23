@@ -12,6 +12,8 @@ describe "create an invoice", javascript: true, type: :feature do
       click_link "My Account"
       click_link "API Tokens", match: :first
       find(".token-access-new-button").find(".btn").click
+      sleep 0.25
+      click_button("Add Token")
       find(".token-claimcode", match: :first).text
     }
     set_client = -> {

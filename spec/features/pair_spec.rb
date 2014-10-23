@@ -9,7 +9,9 @@ describe "pairing a token", javascript: true, type: :feature do
     click_button('loginButton')
     click_link "My Account"
     click_link "API Tokens", match: :first
-    find(".token-access-new-button").find(".btn").click
+    find(".token-access-new-button").find(".btn").find(".icon-plus").click
+    sleep 0.25
+    click_button("Add Token")
     find(".token-claimcode", match: :first).text
   end
   let(:pem) { BitPay::KeyUtils.generate_pem }

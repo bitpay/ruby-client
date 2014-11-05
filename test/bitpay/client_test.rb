@@ -20,6 +20,10 @@ def invoice_response_body
   }
 end
 
+def unauthorized_key_body
+  {"error" => {"type" => "unauthorized", "message" => "invalid api key"}}
+end
+
 stub_request(:post, "https://KEY:@bitpay.com/api/invoice/create").
   with(
     :headers => {'User-Agent'=>USER_AGENT, 'Content-Type' => 'application/json'},
@@ -30,6 +34,10 @@ stub_request(:post, "https://KEY:@bitpay.com/api/invoice/create").
 stub_request(:get, "https://KEY:@bitpay.com/api/invoice/DGrAEmbsXe9bavBPMJ8kuk").
   with(:headers => {'User-Agent'=>USER_AGENT}).
   to_return(:body => invoice_response_body.to_json)
+
+stub_request(:get, "https://KEY:@bitpay.com/api/invoice/BADAPIKEY").
+  with(:headers => {'User-Agent'=>USER_AGENT}).
+  to_return(:status => 403, :body => unauthorized_key_body.to_json)  
 
 describe BitPay::Client do
   before do
@@ -51,4 +59,12 @@ describe BitPay::Client do
       response['id'].must_equal 'DGrAEmbsXe9bavBPMJ8kuk'
     end
   end
+
+  describe 'bad API Key' do
+    it 'returns Error' do
+      assert_raises(BitPay::Client::BitPayError) {
+        response = @client.get 'invoice/BADAPIKEY'
+      }
+    end
+  end  
 end

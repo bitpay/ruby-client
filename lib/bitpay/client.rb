@@ -54,7 +54,7 @@ module BitPay
     def request(request_klass, path, params=nil)
       request  = make_request(request_klass, path, params)
       response = @https.request(request)
-      raise BitPayError, response.body unless response.kind_of?(Net::HTTPSuccess)
+      raise BitPayError, "HTTP Status " + response.code + " with body: " + response.body unless response.kind_of?(Net::HTTPSuccess)
       return JSON.parse(response.body)
     rescue => e
       fail BitPayError, "Bitpay Request Error: #{e}"

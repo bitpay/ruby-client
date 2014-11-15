@@ -73,6 +73,11 @@ describe BitPay::Client do
       bitpay_client.create_invoice(id: "addd", price: 20, currency: "USD")
       assert_requested :post, "#{BitPay::TEST_API_URI}/invoices"
     end
+
+    it 'should pass through the API error message from load_tokens' do
+      stub_request(:get, /#{BitPay::TEST_API_URI}\/tokens.*/).to_return(status: 500, body: '{"error": "load_tokens_error"}')
+      expect { bitpay_client.create_invoice(id: "addd", price: 20, currency: "USD") }.to raise_error(BitPay::BitPayError, '500: load_tokens_error')         
+    end
   end
 end
 

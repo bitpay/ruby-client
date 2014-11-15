@@ -53,13 +53,13 @@ describe BitPay::Client do
     it 'throws a BitPayError with the error message if the token setting fails' do
       stub_const('ENV', {'BITPAY_PEM' => PEM})
       stub_request(:any, /#{BitPay::TEST_API_URI}.*/).to_return(status: 500, body: "{\n  \"error\": \"Unable to create token\"\n}")
-      expect { bitpay_client.pair_pos_client(:claim_code) }.to raise_error(BitPay::BitPayError, 'Unable to create token')
+      expect { bitpay_client.pair_pos_client(:claim_code) }.to raise_error(BitPay::BitPayError, '500: Unable to create token')
     end 
 
     it 'gracefully handles 4xx errors' do
       stub_const('ENV', {'BITPAY_PEM' => PEM})
       stub_request(:any, /#{BitPay::TEST_API_URI}.*/).to_return(status: 403, body: "{\n  \"error\": \"this is a 403 error\"\n}")
-      expect { bitpay_client.pair_pos_client(:claim_code) }.to raise_error(BitPay::BitPayError, '403: {"error"=>"this is a 403 error"}')
+      expect { bitpay_client.pair_pos_client(:claim_code) }.to raise_error(BitPay::BitPayError, '403: this is a 403 error')
     end
   end
 

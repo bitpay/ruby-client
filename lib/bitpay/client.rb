@@ -29,6 +29,7 @@ module BitPay
       @https             = Net::HTTP.new @uri.host, @uri.port
       @https.use_ssl     = true
       @https.ca_file     = CA_FILE
+      @tokens            = {}
 
       # Option to disable certificate validation in extraordinary circumstance.  NOT recommended for production use
       @https.verify_mode = opts[:insecure] == true ? OpenSSL::SSL::VERIFY_NONE : OpenSSL::SSL::VERIFY_PEER
@@ -36,8 +37,6 @@ module BitPay
       # Option to enable http request debugging
       @https.set_debug_output($stdout) if opts[:debug] == true
 
-      # Load all the available tokens into @tokens
-      load_tokens      
     end
 
     def pair_pos_client(claimCode)
@@ -67,7 +66,7 @@ module BitPay
     
     ## Generates REST request to api endpoint
     def send_request(verb, path, facade: 'merchant', params: {}, token: nil)
-      token ||= @tokens[facade] || raise(BitPayError, "No token for specified facade: #{facade}")
+      token ||= get_token(facade)
 
       # Verb-specific logic
       case verb.upcase
@@ -122,16 +121,24 @@ module BitPay
 
       response = @https.request request
 
-      # /tokens returns an array of hashes.  Let's turn it into a more useful single hash
-      token_array = JSON.parse(response.body)["data"] || {}
+      if response.kind_of? Net::HTTPSuccess
 
-      tokens = {}
-      token_array.each do |t|
-        tokens[t.keys.first] = t.values.first
+        # /tokens returns an array of hashes.  Let's turn it into a more useful single hash
+        token_array = JSON.parse(response.body)["data"] || {}
+
+        tokens = {}
+        token_array.each do |t|
+          tokens[t.keys.first] = t.values.first
+        end
+
+        @tokens = tokens
+        return tokens
+
+      elsif JSON.parse(response.body)["error"]
+        raise(BitPayError, "#{response.code}: #{JSON.parse(response.body)['error']}")
+      else
+        raise BitPayError, "#{response.code}: #{JSON.parse(response.body)}"
       end
-
-      @tokens = tokens
-      return tokens
 
     end
 

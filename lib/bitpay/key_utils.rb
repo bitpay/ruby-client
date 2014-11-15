@@ -85,7 +85,7 @@ module BitPay
         # hence the requirement to use [].pack("H*") to convert to binary for each step
         
         #Generate Private Key
-        key = pem.nil? ? get_local_pem_file : OpenSSL::PKey::EC.new(pem)
+        key = OpenSSL::PKey::EC.new(pem ||= get_local_pem_file)
         key.public_key.group.point_conversion_form = :compressed
         public_key = key.public_key.to_bn.to_s(2)
         step_one = Digest::SHA256.hexdigest(public_key)

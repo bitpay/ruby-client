@@ -60,11 +60,17 @@ describe BitPay::KeyUtils do
 
   describe '.generate_sin_from_pem' do
     let(:pem){PEM}
-    let(:sin){"TeyN4LPrXiG5t2yuSamKqP3ynVk3F52iHrX"}
+    let(:sin){CLIENT_ID}
 
     it 'will return the right sin for the right pem' do
       expect(key_utils.generate_sin_from_pem(pem)).to eq sin
     end
+
+    it 'will retrieve the locally stored PEM if one is not provided' do
+      allow(File).to receive(:read).with(BitPay::PRIVATE_KEY_PATH) {PEM}
+      expect(key_utils.generate_sin_from_pem(nil)).to eq sin
+    end
+
   end
 
   context "errors when priv_key is not provided" do

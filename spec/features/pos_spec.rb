@@ -17,7 +17,6 @@ describe "create an invoice", javascript: true, type: :feature do
       find(".token-claimcode", match: :first).text
     }
     set_client = -> {
-      private_key =  BitPay::KeyUtils.get_private_key_from_pem PEM
       client = BitPay::Client.new(api_uri: ROOT_ADDRESS, pem: PEM, insecure: true)
       client.pair_pos_client(get_claim_code.call)
       client

@@ -87,9 +87,6 @@ module BitPay
       end
 
       # Build request headers and submit
-      request['User-Agent'] = @user_agent
-      request['Content-Type'] = 'application/json'
-      request['X-BitPay-Plugin-Info'] = 'Rubylib' + VERSION
       request['X-Identity'] = @pub_key
  
       response = process_request(request)
@@ -102,6 +99,11 @@ module BitPay
     # Otherwise throws error
     #
     def process_request(request)
+
+      request['User-Agent'] = @user_agent
+      request['Content-Type'] = 'application/json'
+      request['X-BitPay-Plugin-Info'] = 'Rubylib' + VERSION
+
       response = @https.request request
 
       if response.kind_of? Net::HTTPSuccess
@@ -122,8 +124,6 @@ module BitPay
       urlpath = '/tokens?nonce=' + KeyUtils.nonce
 
       request = Net::HTTP::Get.new(urlpath)
-      request['content-type'] = "application/json"
-      request['user-agent'] = @user_agent
       request['x-identity'] = @pub_key
       request['x-signature'] = KeyUtils.sign(@uri.to_s + urlpath, @priv_key)
 
@@ -149,9 +149,6 @@ module BitPay
       params[:guid] = SecureRandom.uuid
       params[:id] = @client_id
       request.body = params.to_json
-      request['User-Agent'] = @user_agent
-      request['Content-Type'] = 'application/json'
-      request['X-BitPay-Plugin-Info'] = 'Rubylib' + VERSION
       process_request(request)
     end
 

@@ -72,6 +72,9 @@ API Documentation is available on the [BitPay site](https://bitpay.com/api).
 The code has been fully code documented, and the latest version is always available at the [Rubydoc Site](http://rubydoc.info/gems/bitpay-client).
 
 ## Running the Tests
+The tests require that environment variables be set for the bitpay server, user name, and password. First run:
+    
+    $ source ./spec/set_constants.sh https://test.bitpay.com <yourusername> <yourpassword>
 
     $ bundle install
     $ bundle exec rake

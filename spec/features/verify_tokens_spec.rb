@@ -5,10 +5,14 @@ describe "create an invoice", javascript: true, type: :feature do
     WebMock.allow_net_connect!
     get_claim_code = -> {
       visit ROOT_ADDRESS
-      click_link('Login')
-      fill_in 'email', :with => TEST_USER
-      fill_in 'password', :with => TEST_PASS
-      click_button('loginButton')
+      if has_link?('Login')
+        click_link('Login')
+        fill_in 'email', :with => TEST_USER
+        fill_in 'password', :with => TEST_PASS
+        click_button('loginButton')
+      else
+        visit "#{ROOT_ADDRESS}/home"
+      end
       click_link "My Account"
       click_link "API Tokens", match: :first
       find(".token-access-new-button").find(".btn").click
@@ -21,18 +25,10 @@ describe "create an invoice", javascript: true, type: :feature do
       client.pair_pos_client(get_claim_code.call)
       client
     }
-    @client ||= set_client.call
-    @invoice_id ||= SecureRandom.uuid
-    @price ||= (100..150).to_a.sample
-    @invoice = @client.create_invoice(currency: "USD", price: @price)
+    @client = set_client.call 
   end
 
-  it "should create an invoice" do
-    expect(@invoice["status"]).to eq "new"
-  end
-
-  it "should be able to retrieve an invoice" do
-    expect(@client.get_public_invoice(id: @invoice['id'])["price"]).to eq @price
+  it 'should verify tokens' do
+    expect(@client.verify_token).to be true
   end
 end
-

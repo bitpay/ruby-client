@@ -43,6 +43,7 @@ module BitPay
       raise BitPay::ArgumentError, "pairing code is not legal" unless verify_claim_code(claimCode)
       response = set_pos_token(claimCode)
       get_token 'pos'
+      write_token_file(response["data"][0])
       response
     end
 
@@ -160,6 +161,10 @@ module BitPay
 
     def get_token(facade)
       token = @tokens[facade] || load_tokens[facade] || raise(BitPayError, "Not authorized for facade: #{facade}")
+    end
+
+    def write_token_file(token)
+      File.open(BitPay::TOKEN_FILE_PATH, 'w') { |file| file.write(JSON.generate(token)) }
     end
 
     def verify_claim_code(claim_code)

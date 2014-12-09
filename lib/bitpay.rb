@@ -22,6 +22,8 @@ module BitPay
   BITPAY_CREDENTIALS_DIR = File.join(Dir.home, ".bitpay")
   PRIVATE_KEY_FILE = 'bitpay.pem'
   PRIVATE_KEY_PATH = File.join(BITPAY_CREDENTIALS_DIR, PRIVATE_KEY_FILE)
+  TOKEN_FILE = 'tokens.json'
+  TOKEN_FILE_PATH = File.join(BITPAY_CREDENTIALS_DIR, TOKEN_FILE)
 
   # User agent reported to API
   USER_AGENT = 'ruby-bitpay-client '+VERSION

@@ -65,6 +65,15 @@ describe BitPay::Client do
       expect { bitpay_client.pair_pos_client(claim_code) }.to raise_error(BitPay::BitPayError, '403: this is a 403 error')
     end
 
+    it 'saves the returned token' do
+      bitpay_client
+      json_tokens = JSON.generate(tokens)
+      stub_request(:any, /#{BitPay::TEST_API_URI}.*/).to_return(status: 200, body: json_tokens)
+      file = class_double("File").as_stubbed_const
+      expect(file).to receive(:open).with(BitPay::TOKEN_FILE_PATH, 'w')
+      bitpay_client.pair_pos_client(claim_code)
+    end
+
     it 'short circuits on invalid pairing codes' do
       100.times do
         claim_code = an_illegal_claim_code

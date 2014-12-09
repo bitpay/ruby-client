@@ -40,8 +40,10 @@ module BitPay
     end
 
     def pair_pos_client(claimCode)
+      raise BitPay::ArgumentError, "pairing code is not legal" unless verify_claim_code(claimCode)
       response = set_pos_token(claimCode)
       get_token 'pos'
+      write_token_file(response["data"][0])
       response
     end
 
@@ -104,7 +106,12 @@ module BitPay
       request['Content-Type'] = 'application/json'
       request['X-BitPay-Plugin-Info'] = 'Rubylib' + VERSION
 
-      response = @https.request request
+      begin
+        response = @https.request request
+      rescue => error
+        raise BitPay::ConnectionError, "#{error.message}"
+        binding.pry
+      end
 
       if response.kind_of? Net::HTTPSuccess
         return JSON.parse(response.body)
@@ -156,5 +163,14 @@ module BitPay
       token = @tokens[facade] || load_tokens[facade] || raise(BitPayError, "Not authorized for facade: #{facade}")
     end
 
+    def write_token_file(token)
+      File.open(BitPay::TOKEN_FILE_PATH, 'w') { |file| file.write(JSON.generate(token)) }
+    end
+
+    def verify_claim_code(claim_code)
+      regex = /^[[:alnum:]]{7}$/
+      matches = regex.match(claim_code)
+      !(matches.nil?)
+    end
   end
 end

@@ -30,5 +30,7 @@ module BitPay
   MISSING_PEM = 'No pem file specified. Pass pem or set ENV variable BITPAY_PEM'
   
   class BitPayError < StandardError; end
+  class ArgumentError < ArgumentError; end
+  class ConnectionError < Errno::ECONNREFUSED; end
   
 end

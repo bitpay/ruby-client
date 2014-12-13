@@ -1,5 +1,4 @@
 When(/^the user (?:tries to |)creates? an invoice (?:for|without) "(.*?)" (?:or |and |)"(.*?)"$/) do |price, currency|
-  step "the user pairs with BitPay" if @client.nil?
   begin
     @response = @client.create_invoice(price: price, currency: currency)
   rescue => error

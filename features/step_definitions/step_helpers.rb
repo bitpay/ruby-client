@@ -14,7 +14,14 @@ require_relative '../../config/capybara.rb'
 #
 #PUB_KEY = '038d970d6ba29dcfa190c177140fd889fadd6d2590b1ee1a6a06e255dbf22b4017'
 #CLIENT_ID = "TeyN4LPrXiG5t2yuSamKqP3ynVk3F52iHrX"
-
+module BitPay
+  # Location for API Credentials
+  BITPAY_CREDENTIALS_DIR = File.join(Dir.home, ".bitpay")
+  PRIVATE_KEY_FILE = 'bitpay.pem'
+  PRIVATE_KEY_PATH = File.join(BITPAY_CREDENTIALS_DIR, PRIVATE_KEY_FILE)
+  TOKEN_FILE = 'tokens.json'
+  TOKEN_FILE_PATH = File.join(BITPAY_CREDENTIALS_DIR, TOKEN_FILE)
+end
 
 def get_claim_code_from_server
   Capybara::visit ROOT_ADDRESS
@@ -27,7 +34,7 @@ def get_claim_code_from_server
   Capybara::click_link "API Tokens", match: :first
   Capybara::find(".token-access-new-button").find(".btn").find(".icon-plus").click
   sleep 0.25
-  Capybara::click_button("Add Token")
+  Capybara::find_button("Add Token", match: :first).click
   Capybara::find(".token-claimcode", match: :first).text
 end
 
@@ -63,7 +70,7 @@ def new_client_from_stored_values
 end
 
 def get_token_from_file
-  token = JSON.parse(File.read(BitPay::TOKEN_FILE_PATH))
+  token = JSON.parse(File.read(BitPay::TOKEN_FILE_PATH))['data'][0]
   {token['facade'] => token['token']}
 end
 

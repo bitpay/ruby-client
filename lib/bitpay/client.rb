@@ -120,7 +120,6 @@ module BitPay
         response = @https.request request
       rescue => error
         raise BitPay::ConnectionError, "#{error.message}"
-        binding.pry
       end
 
       if response.kind_of? Net::HTTPSuccess

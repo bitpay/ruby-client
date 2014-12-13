@@ -50,7 +50,7 @@ def new_client_from_stored_values
   if File.file?(BitPay::PRIVATE_KEY_PATH) && File.file?(BitPay::TOKEN_FILE_PATH)
     token = get_token_from_file
     pem = File.read(BitPay::PRIVATE_KEY_PATH)
-    BitPay::Client.new(pem: pem, token: token, insecure: true, api_uri: ROOT_ADDRESS )
+    BitPay::Client.new(pem: pem, tokens: token, insecure: true, api_uri: ROOT_ADDRESS )
   else
     claim_code = get_claim_code_from_server
     pem = BitPay::KeyUtils.generate_pem

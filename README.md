@@ -29,6 +29,8 @@ To pair with bitpay.com you need to have an approved merchant account.
 3. Copy an existing pairing code or create a new token and copy the pairing code.  
 4. Use the bitpay command line tool to pair with bitpay.com `bitpay pair <pairing_code>`   
 
+By default, this will attempt to save your keys in "~/.bitpay/bitpay.pem", and that file will be the file used for all other key files. To use a different set of keys, you can set the `BITPAY_PEM` environment variable to the folder where you are storing a pem file.
+
 ### To create an invoice with a paired client:
 
     client = BitPay::Client.new 

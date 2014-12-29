@@ -1,12 +1,12 @@
 require './lib/bitpay/version.rb'
 Gem::Specification.new do |s|
-  s.name = 'bitpay-client'
+  s.name = 'bitpay'
   s.version = BitPay::VERSION
   s.licenses = ['MIT']
   s.authors = 'Bitpay, Inc.'
   s.email = 'info@bitpay.com'
   s.homepage = 'https://github.com/bitpay/ruby-client'
-  s.summary = 'Official ruby client library for the BitPay API'
+  s.summary = 'Official Ruby library for the BitPay API'
   s.description = 'Powerful, flexible, lightweight, thread-safe interface to the BitPay developers API'
 
   s.files = `git ls-files`.split("\n")
@@ -17,19 +17,19 @@ Gem::Specification.new do |s|
   s.bindir        = 'bin'
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
 
-  s.add_dependency 'json'
-  s.add_dependency 'rack',    '>= 0'
-  s.add_dependency 'ecdsa'
-  s.add_dependency 'commander'
+  s.add_dependency 'json',      '~> 1.8.1'
+  s.add_dependency 'rack',      '~> 1.5.2'
+  s.add_dependency 'ecdsa',     '~> 1.2.0'
 
-  s.add_development_dependency 'rake'
-  s.add_development_dependency 'webmock'
-  s.add_development_dependency 'pry'
-  s.add_development_dependency 'pry-byebug'
-  s.add_development_dependency 'pry-rescue'
-  s.add_development_dependency 'capybara'
-  s.add_development_dependency 'poltergeist'
-  s.add_development_dependency 'airborne'
-  s.add_development_dependency 'rspec'
-  s.add_development_dependency 'mongo'
+  s.add_development_dependency 'rake', '~> 10.3.2'
+  s.add_development_dependency 'webmock', '~> 1.18.0'
+  s.add_development_dependency 'pry', '~> 0.10.1'
+  s.add_development_dependency 'pry-byebug', '~> 2.0.0'
+  s.add_development_dependency 'pry-rescue', '~> 1.4.1'
+  s.add_development_dependency 'capybara', '~> 2.4.3'
+  s.add_development_dependency 'cucumber', '~> 1.3.17'
+  s.add_development_dependency 'poltergeist', '~> 1.5.1'
+  s.add_development_dependency 'airborne', '~> 0.0.20'
+  s.add_development_dependency 'rspec', '~> 3.1.0'
+  s.add_development_dependency 'mongo', '~> 1.11.1'
 end

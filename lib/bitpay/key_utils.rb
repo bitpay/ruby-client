@@ -18,21 +18,12 @@ module BitPay
         Time.now.utc.strftime('%Y%m%d%H%M%S%L')
       end
 
-      ## Generates a new private key and writes to local FS
+      ## Generates a new private key 
       #
-      def retrieve_or_generate_pem
-        begin
-          pem = get_local_pem_file
-        rescue
-          pem = generate_pem
-        end
-        pem
-      end
 
       def generate_pem
         key = OpenSSL::PKey::EC.new("secp256k1")
         key.generate_key
-        write_pem_file(key)
         key.to_pem
       end
 
@@ -46,14 +37,10 @@ module BitPay
         key
       end
 
-      def write_pem_file key
-        FileUtils.mkdir_p(BITPAY_CREDENTIALS_DIR)
-        File.open(PRIVATE_KEY_PATH, 'w') { |file| file.write(key.to_pem) }
-      end
       ## Gets private key from ENV variable or local FS
       #
       def get_local_pem_file
-        ENV['BITPAY_PEM'] || File.read(PRIVATE_KEY_PATH) || (raise BitPayError, MISSING_KEY)
+        ENV['BITPAY_PEM'] || (raise BitPayError, MISSING_KEY)
       end
     
       def get_private_key key
@@ -66,7 +53,7 @@ module BitPay
       end
 
       def get_private_key_from_pem pem
-        raise BitPayError, MISSING_KEY unless pem
+        raise BitPayError, "Missing key" unless pem
         key = OpenSSL::PKey::EC.new(pem)
         get_private_key key
       end

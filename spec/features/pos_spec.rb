@@ -12,8 +12,7 @@ describe "create an invoice", javascript: true, type: :feature do
       click_link "My Account"
       click_link "API Tokens", match: :first
       find(".token-access-new-button").find(".btn").click
-      sleep 0.25
-      click_button("Add Token")
+    find_button("Add Token", match: :first).click
       find(".token-claimcode", match: :first).text
     }
     set_client = -> {
@@ -24,7 +23,7 @@ describe "create an invoice", javascript: true, type: :feature do
     @client ||= set_client.call
     @invoice_id ||= SecureRandom.uuid
     @price ||= (100..150).to_a.sample
-    @invoice = @client.create_invoice(id: @invoice_id, currency: "USD", price: @price)
+    @invoice = @client.create_invoice(currency: "USD", price: @price)
   end
 
   it "should create an invoice" do

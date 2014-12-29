@@ -18,10 +18,6 @@ module BitPay
   TEST_API_URI = 'https://test.bitpay.com'
   CLIENT_REGISTRATION_PATH = '/api-access-request'
   
-  # Location for API Credentials
-  BITPAY_CREDENTIALS_DIR = File.join(Dir.home, ".bitpay")
-  PRIVATE_KEY_FILE = 'bitpay.pem'
-  PRIVATE_KEY_PATH = File.join(BITPAY_CREDENTIALS_DIR, PRIVATE_KEY_FILE)
 
   # User agent reported to API
   USER_AGENT = 'ruby-bitpay-client '+VERSION

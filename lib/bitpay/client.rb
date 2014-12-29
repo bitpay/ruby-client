@@ -19,7 +19,7 @@ module BitPay
     #  # Create a client with a pem file created by the bitpay client:
     #  client = BitPay::Client.new
     def initialize(opts={})
-      @pem               = opts[:pem] || ENV['BITPAY_PEM'] || KeyUtils.retrieve_or_generate_pem 
+      @pem               = opts[:pem] || ENV['BITPAY_PEM'] || KeyUtils.generate_pem 
       @key               = KeyUtils.create_key @pem
       @priv_key          = KeyUtils.get_private_key @key
       @pub_key           = KeyUtils.get_public_key @key
@@ -29,7 +29,7 @@ module BitPay
       @https             = Net::HTTP.new @uri.host, @uri.port
       @https.use_ssl     = true
       @https.ca_file     = CA_FILE
-      @tokens            = {}
+      @tokens            = opts[:tokens] || {}
 
       # Option to disable certificate validation in extraordinary circumstance.  NOT recommended for production use
       @https.verify_mode = opts[:insecure] == true ? OpenSSL::SSL::VERIFY_NONE : OpenSSL::SSL::VERIFY_PEER
@@ -46,7 +46,9 @@ module BitPay
       response
     end
 
-    def create_invoice(id:, price:, currency:, facade: 'pos', params:{})
+    def create_invoice(price:, currency:, facade: 'pos', params:{})
+      raise BitPay::ArgumentError, "Illegal Argument: Price must be formatted as a float" unless ( price.is_a?(Numeric) || /^[[:digit:]]+(\.[[:digit:]]{2})?$/.match(price) )
+      raise BitPay::ArgumentError, "Illegal Argument: Currency is invalid." unless /^[[:upper:]]{3}$/.match(currency)
       params.merge!({price: price, currency: currency})
       response = send_request("POST", "invoices", facade: facade, params: params)
       response["data"]
@@ -58,7 +60,16 @@ module BitPay
       response["data"]
     end
     
+    def set_token
+    end
+
+    def verify_token
+      server_tokens = load_tokens
+      @tokens.each{|key, value| return false if server_tokens[key] != value}
+      return true
+    end
     ## Generates REST request to api endpoint
+
     def send_request(verb, path, facade: 'merchant', params: {}, token: nil)
       token ||= get_token(facade)
 
@@ -109,7 +120,6 @@ module BitPay
         response = @https.request request
       rescue => error
         raise BitPay::ConnectionError, "#{error.message}"
-        binding.pry
       end
 
       if response.kind_of? Net::HTTPSuccess

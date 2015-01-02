@@ -22,8 +22,7 @@ module BitPay
   # User agent reported to API
   USER_AGENT = 'ruby-bitpay-client '+VERSION
   
-  MISSING_KEY = 'No Private Key specified.  Pass priv_key or set ENV variable PRIV_KEY'
-  MISSING_PEM = 'No pem file specified. Pass pem or set ENV variable BITPAY_PEM'
+  MISSING_PEM = 'No pem file specified. Pass pem string'
   
   class BitPayError < StandardError; end
   class ArgumentError < ArgumentError; end

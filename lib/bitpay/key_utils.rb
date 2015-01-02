@@ -37,12 +37,6 @@ module BitPay
         key
       end
 
-      ## Gets private key from ENV variable or local FS
-      #
-      def get_local_pem_file
-        ENV['BITPAY_PEM'] || (raise BitPayError, MISSING_KEY)
-      end
-    
       def get_private_key key
         key.private_key.to_int.to_s(16)
       end
@@ -53,18 +47,18 @@ module BitPay
       end
 
       def get_private_key_from_pem pem
-        raise BitPayError, "Missing key" unless pem
+        raise BitPayError, MISSING_PEM
         key = OpenSSL::PKey::EC.new(pem)
         get_private_key key
       end
 
       def get_public_key_from_pem pem
-        raise BitPayError, MISSING_KEY unless pem
+        raise BitPayError, MISSING_PEM unless pem
         key = OpenSSL::PKey::EC.new(pem)
         get_public_key key
       end
 
-      def generate_sin_from_pem(pem = nil)
+      def generate_sin_from_pem pem
         #http://blog.bitpay.com/2014/07/01/bitauth-for-decentralized-authentication.html
         #https://en.bitcoin.it/wiki/Identity_protocol_v1
 
@@ -72,7 +66,7 @@ module BitPay
         # hence the requirement to use [].pack("H*") to convert to binary for each step
         
         #Generate Private Key
-        key = OpenSSL::PKey::EC.new(pem ||= get_local_pem_file)
+        key = OpenSSL::PKey::EC.new pem
         key.public_key.group.point_conversion_form = :compressed
         public_key = key.public_key.to_bn.to_s(2)
         step_one = Digest::SHA256.hexdigest(public_key)

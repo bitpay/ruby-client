@@ -1,6 +1,6 @@
 require './lib/bitpay/version.rb'
 Gem::Specification.new do |s|
-  s.name = 'bitpay'
+  s.name = 'bitpay-sdk'
   s.version = BitPay::VERSION
   s.licenses = ['MIT']
   s.authors = 'Bitpay, Inc.'

@@ -3,5 +3,5 @@
 # or https://github.com/bitpay/php-bitpay-client/blob/master/LICENSE
 
 module BitPay
-  VERSION = '2.1.1'
+  VERSION = '2.2.0'
 end

@@ -20,7 +20,7 @@ Given(/^that a user knows an invoice id$/) do
 end
 
 Then(/^they can retrieve that invoice$/) do
-  invoice = BitPay::Client.new(api_uri: ROOT_ADDRESS, insecure: true).get_public_invoice(id: @id)
+  invoice = BitPay::SDK::Client.new(api_uri: ROOT_ADDRESS, insecure: true).get_public_invoice(id: @id)
   raise "That's the wrong invoice" unless invoice['id'] == @id
 end
 

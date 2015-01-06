@@ -5,3 +5,5 @@ pkg
 .c9
 .ruby-version
 .ruby-gemset
+*.swo
+*.swp

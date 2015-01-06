@@ -3,19 +3,6 @@ require 'spec_helper'
 describe BitPay::KeyUtils do
   let(:key_utils) {BitPay::KeyUtils}
 
-
-  describe '.get_local_private_key' do
-    it "should get the key from the ENV['PRIV_KEY'] variable" do
-      stub_const('ENV', {'BITPAY_PEM' => PEM})
-      expect(key_utils.get_local_pem_file).to eq(PEM)
-    end
-    
-    it "should throw an error if the ENV['PRIV_KEY'] variable is not set" do
-      expect {key_utils.get_local_pem_file}.to raise_error( BitPay::BitPayError )
-    end
-
-  end
-
   describe '.generate_pem' do
     it 'should generate a pem string' do
       regex = /BEGIN\ EC\ PRIVATE\ KEY/
@@ -40,11 +27,6 @@ describe BitPay::KeyUtils do
 
     it 'will return the right sin for the right pem' do
       expect(key_utils.generate_sin_from_pem(pem)).to eq sin
-    end
-
-    it 'will attempt to use an env variable if no key is provided' do
-      stub_const('ENV', {'BITPAY_PEM' => PEM})
-      expect(key_utils.generate_sin_from_pem(nil)).to eq sin
     end
 
   end

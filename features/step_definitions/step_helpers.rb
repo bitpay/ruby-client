@@ -1,9 +1,7 @@
 require 'capybara/poltergeist'
 require 'pry'
 
-require File.join File.dirname(__FILE__), '..', '..', 'lib', 'bitpay', 'client.rb'
-require File.join File.dirname(__FILE__), '..', '..', 'lib', 'bitpay', 'key_utils.rb'
-require File.join File.dirname(__FILE__), '..', '..', 'lib', 'bitpay.rb'
+require File.join File.dirname(__FILE__), '..', '..', 'lib', 'bitpay_sdk.rb'
 require_relative '../../config/constants.rb'
 require_relative '../../config/capybara.rb'
 
@@ -48,7 +46,7 @@ end
 def new_paired_client
   claim_code = get_claim_code_from_server
   pem = BitPay::KeyUtils.generate_pem
-  client = BitPay::Client.new(api_uri: ROOT_ADDRESS, pem: pem, insecure: true)
+  client = BitPay::SDK::Client.new(api_uri: ROOT_ADDRESS, pem: pem, insecure: true)
   client.pair_pos_client(claim_code)
   client
 end
@@ -57,11 +55,11 @@ def new_client_from_stored_values
   if File.file?(BitPay::PRIVATE_KEY_PATH) && File.file?(BitPay::TOKEN_FILE_PATH)
     token = get_token_from_file
     pem = File.read(BitPay::PRIVATE_KEY_PATH)
-    BitPay::Client.new(pem: pem, tokens: token, insecure: true, api_uri: ROOT_ADDRESS )
+    BitPay::SDK::Client.new(pem: pem, tokens: token, insecure: true, api_uri: ROOT_ADDRESS )
   else
     claim_code = get_claim_code_from_server
     pem = BitPay::KeyUtils.generate_pem
-    client = BitPay::Client.new(api_uri: ROOT_ADDRESS, pem: pem, insecure: true)
+    client = BitPay::SDK::Client.new(api_uri: ROOT_ADDRESS, pem: pem, insecure: true)
     token = client.pair_pos_client(claim_code)
     File.write(BitPay::PRIVATE_KEY_PATH, pem)
     File.write(BitPay::TOKEN_FILE_PATH, JSON.generate(token))

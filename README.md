@@ -3,15 +3,15 @@ Powerful, flexible, lightweight interface to the BitPay Bitcoin Payment Gateway 
 
 ## Installation
 
-    gem install bitpay
+    gem install bitpay-sdk
     
 In your Gemfile:
 
-    gem 'bitpay', :require => 'bitpay'
+    gem 'bitpay-sdk', :require => 'bitpay_sdk'
 
 Or directly:
 
-    require 'bitpay'
+    require 'bitpay_sdk'
 
 ## Configuration
 

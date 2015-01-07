@@ -14,7 +14,7 @@ describe "pairing a token", javascript: true, type: :feature do
     find(".token-claimcode", match: :first).text
   end
   let(:pem) { BitPay::KeyUtils.generate_pem }
-  let(:client) { BitPay::Client.new(api_uri: ROOT_ADDRESS, pem: pem, insecure: true) }
+  let(:client) { BitPay::SDK::Client.new(api_uri: ROOT_ADDRESS, pem: pem, insecure: true) }
 
   context "pairing an unpaired client" do
     it "should have no tokens before pairing" do

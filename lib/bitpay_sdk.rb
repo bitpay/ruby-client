@@ -20,7 +20,7 @@ module BitPay
   
 
   # User agent reported to API
-  USER_AGENT = 'ruby-bitpay-client '+VERSION
+  USER_AGENT = 'ruby-bitpay-sdk '+VERSION
   
   MISSING_PEM = 'No pem file specified. Pass pem string'
   

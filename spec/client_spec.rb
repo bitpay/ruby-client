@@ -9,8 +9,8 @@ def tokens
     }
 end
 
-describe BitPay::Client do
-  let(:bitpay_client) { BitPay::Client.new({api_uri: BitPay::TEST_API_URI}) }
+describe BitPay::SDK::Client do
+  let(:bitpay_client) { BitPay::SDK::Client.new({api_uri: BitPay::TEST_API_URI}) }
   let(:claim_code) { "a12bc3d" }
 
   before do

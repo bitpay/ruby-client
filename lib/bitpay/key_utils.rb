@@ -47,7 +47,7 @@ module BitPay
       end
 
       def get_private_key_from_pem pem
-        raise BitPayError, MISSING_PEM
+        raise BitPayError, MISSING_PEM unless pem
         key = OpenSSL::PKey::EC.new(pem)
         get_private_key key
       end

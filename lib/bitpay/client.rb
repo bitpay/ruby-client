@@ -14,7 +14,6 @@ module BitPay
   module SDK
     class Client
       
-
       # @return [Client]
       # @example
       #  # Create a client with a pem file created by the bitpay client:
@@ -37,14 +36,21 @@ module BitPay
         
         # Option to enable http request debugging
         @https.set_debug_output($stdout) if opts[:debug] == true
-
       end
 
+      ## Pair client with BitPay service
+      # => Pass empty hash {} to retreive client-initiated pairing code
+      # => Pass {pairingCode: 'WfD01d2'} to claim a server-initiated pairing code
+      #
+      def pair_client(params={})
+        pairing_request(params)
+      end
+
+      ## Compatibility method for pos pairing
+      #
       def pair_pos_client(claimCode)
         raise BitPay::ArgumentError, "pairing code is not legal" unless verify_claim_code(claimCode)
-        response = set_pos_token(claimCode)
-        get_token 'pos'
-        response
+        pair_client({pairingCode: claimCode})
       end
 
       def create_invoice(price:, currency:, facade: 'pos', params:{})
@@ -137,7 +143,6 @@ module BitPay
       #  Returns a hash of available tokens
       #
       def load_tokens
-
         urlpath = '/tokens?nonce=' + KeyUtils.nonce
 
         request = Net::HTTP::Get.new(urlpath)
@@ -158,9 +163,13 @@ module BitPay
 
       end
 
-      ## Retrieves specified token from hash, otherwise tries to refresh @tokens and retry
-      def set_pos_token(claim_code)
-        params = {pairingCode: claim_code}
+      ## Makes a request to /tokens for pairing
+      #     Adds passed params as post parameters
+      #     If empty params, retrieves server-generated pairing code
+      #     If pairingCode key/value is passed, will pair client ID to this account
+      #   Returns response hash
+      #
+      def pairing_request(params)
         urlpath = '/tokens'
         request = Net::HTTP::Post.new urlpath
         params[:guid] = SecureRandom.uuid

@@ -20,6 +20,13 @@ RSpec.configure do |config|
   config.before :each do |example|
     WebMock.allow_net_connect! if example.metadata[:type] == :feature 
   end
+
+  config.after :each do |example|
+    if example.metadata[:type] == :feature and example.exception
+      save_and_open_screenshot
+    end
+  end
+
 end
 
 def an_illegal_claim_code

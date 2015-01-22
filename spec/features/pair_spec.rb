@@ -21,8 +21,14 @@ describe "pairing a token", javascript: true, type: :feature do
       expect(client.instance_variable_get(:@tokens)).to be_empty
     end
     it "should have a pos token after pairing" do
-      client.pair_pos_client(claimCode)  
-      expect(client.instance_variable_get(:@tokens)['pos']).not_to be_empty
+      sleep 1 # rate limit compliance
+      response = client.pair_client({pairingCode: claimCode})  
+      expect( response["data"].first["facade"] ).to eq("pos")
+    end
+    it "should fetch a client-initiated pairing code" do
+      sleep 1 # rate limit compliance
+      response = client.pair_client({})
+      expect( response["data"].first["pairingCode"] ).not_to be_empty
     end
   end
 

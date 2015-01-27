@@ -37,3 +37,10 @@ def an_illegal_claim_code
   long_code = [*8..25].sample.times.inject([]){|arr| arr << legal_map.sample}.join
   [nil, short_code, long_code].sample
 end
+
+## Gets JSON responses from the fixtures directory
+#
+def get_fixture(name)
+  #JSON.parse(File.read(File.expand_path("../fixtures/#{name}",  __FILE__)))
+  File.read(File.expand_path("../fixtures/#{name}",  __FILE__))
+end

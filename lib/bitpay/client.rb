@@ -17,7 +17,7 @@ module BitPay
       # @return [Client]
       # @example
       #  # Create a client with a pem file created by the bitpay client:
-      #  client = BitPay::Client.new
+      #  client = BitPay::SDK::Client.new
       def initialize(opts={})
         @pem               = opts[:pem] || ENV['BITPAY_PEM'] || KeyUtils.generate_pem 
         @key               = KeyUtils.create_key @pem
@@ -61,9 +61,56 @@ module BitPay
         response["data"]
       end
 
+      ## Gets the privileged merchant-version of the invoice
+      #
+      def get_invoice(id:)
+        response = send_request("GET", "invoices/#{id}", facade: 'merchant')
+        response["data"]        
+      end
+      
+      ## Gets the public version of the invoice
+      #
       def get_public_invoice(id:)
         request = Net::HTTP::Get.new("/invoices/#{id}")
         response = process_request(request)
+        response["data"]
+      end
+      
+      
+      ## Refund paid BitPay invoice
+      #
+      #   If invoice["data"]["flags"]["refundable"] == true the a refund address was 
+      #   provided with the payment and the refund_address parameter is an optional override
+      #  
+      #   Amount and Currency are required fields for fully paid invoices but optional
+      #   for under or overpaid invoices which will otherwise be completely refunded
+      #
+      #  @example
+      #    client.refund_invoice(id: 'JB49z2MsDH7FunczeyDS8j', params: {amount: 10, currency: 'USD', bitcoinAddress: '1Jtcygf8W3cEmtGgepggtjCxtmFFjrZwRV'})
+      #
+      def refund_invoice(id:, params:{})
+        invoice = get_invoice(id: id)
+        response = send_request("POST", "invoices/#{id}/refunds", facade: nil, token: invoice["token"], params: params)
+        response["data"]
+      end
+      
+      ## Get Refunds for Invoice
+      #
+      #   Returns an array of all refund requests for a specific invoice, 
+      #   or the specified refund request if request_id is specified
+      #
+      #  @example:
+      #    client.get_refunds_for_invoice(id: 'JB49z2MsDH7FunczeyDS8j')
+      #    client.get_refunds_for_invoice(id: 'JB49z2MsDH7FunczeyDS8j', request_id: '4evCrXq4EDXk4oqDXdWQhX')
+      #
+      def get_refunds_for_invoice(id:, request_id: nil)
+        if request_id
+          urlpath = "invoices/#{id}/refunds/#{request_id}"
+        else
+          urlpath = "invoices/#{id}/refunds"
+        end
+        invoice = get_invoice(id: id)
+        response = send_request("GET", urlpath, facade: nil, token: invoice["token"])
         response["data"]
       end
       
@@ -83,7 +130,7 @@ module BitPay
         # Verb-specific logic
         case verb.upcase
           when "GET"
-            urlpath = '/' + path + '?nonce=' + KeyUtils.nonce + '&token=' + token
+            urlpath = '/' + path + '?token=' + token
             request = Net::HTTP::Get.new urlpath
             request['X-Signature'] = KeyUtils.sign(@uri.to_s + urlpath, @priv_key)
 
@@ -94,7 +141,6 @@ module BitPay
             urlpath = '/' + path
             request = Net::HTTP::Post.new urlpath
             params[:token] = token
-            params[:nonce] = KeyUtils.nonce
             params[:guid]  = SecureRandom.uuid
             params[:id] = @client_id
             request.body = params.to_json
@@ -143,11 +189,11 @@ module BitPay
       #  Returns a hash of available tokens
       #
       def load_tokens
-        urlpath = '/tokens?nonce=' + KeyUtils.nonce
+        urlpath = '/tokens'
 
         request = Net::HTTP::Get.new(urlpath)
-        request['x-identity'] = @pub_key
-        request['x-signature'] = KeyUtils.sign(@uri.to_s + urlpath, @priv_key)
+        request['X-Identity'] = @pub_key
+        request['X-Signature'] = KeyUtils.sign(@uri.to_s + urlpath, @priv_key)
 
         response = process_request(request)
 

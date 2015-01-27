@@ -1,0 +1,29 @@
+{
+  "facade": "pos/invoice",
+  "data": {
+    "url": "https://test.bitpay.com/invoice?id=2RSyNDvsiTrA31rPwnnEcd",
+    "status": "new",
+    "btcPrice": "0.037523",
+    "btcDue": "0.037523",
+    "price": 10,
+    "currency": "USD",
+    "exRates": {
+      "USD": 266.5
+    },
+    "invoiceTime": 1422319964413,
+    "expirationTime": 1422320864413,
+    "currentTime": 1422319964431,
+    "guid": "34d7be05-eb65-4f72-a2ce-79bf23e93f17",
+    "id": "2RSyNDvsiTrA31rPwnnEcd",
+    "btcPaid": "0.000000",
+    "rate": 266.5,
+    "exceptionStatus": false,
+    "paymentUrls": {
+      "BIP21": "bitcoin:mhPM48eieakd6AgCuHMwAtpFXE5yQ3N7om?amount=0.037523",
+      "BIP72": "bitcoin:mhPM48eieakd6AgCuHMwAtpFXE5yQ3N7om?amount=0.037523&r=https://test.bitpay.com/i/2RSyNDvsiTrA31rPwnnEcd",
+      "BIP72b": "bitcoin:?r=https://test.bitpay.com/i/2RSyNDvsiTrA31rPwnnEcd",
+      "BIP73": "https://test.bitpay.com/i/2RSyNDvsiTrA31rPwnnEcd"
+    },
+    "token": "2RPipMRUXAvt5wAfthCzF7Tj4SppBWPHGQ7hCeWYeWDm7RtwUtDds1XUNt11VTf5C6UfCAACBhsKwjW6SAocLsd7"
+  }
+}

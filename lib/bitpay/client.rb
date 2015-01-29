@@ -53,6 +53,10 @@ module BitPay
         pair_client({pairingCode: claimCode})
       end
 
+      ## Create bitcoin invoice
+      #
+      #   Defaults to pos facade, also works with merchant facade
+      # 
       def create_invoice(price:, currency:, facade: 'pos', params:{})
         raise BitPay::ArgumentError, "Illegal Argument: Price must be formatted as a float" unless ( price.is_a?(Numeric) || /^[[:digit:]]+(\.[[:digit:]]{2})?$/.match(price) )
         raise BitPay::ArgumentError, "Illegal Argument: Currency is invalid." unless /^[[:upper:]]{3}$/.match(currency)
@@ -62,6 +66,7 @@ module BitPay
       end
 
       ## Gets the privileged merchant-version of the invoice
+      #   Requires merchant facade token
       #
       def get_invoice(id:)
         response = send_request("GET", "invoices/#{id}", facade: 'merchant')
@@ -85,6 +90,8 @@ module BitPay
       #   Amount and Currency are required fields for fully paid invoices but optional
       #   for under or overpaid invoices which will otherwise be completely refunded
       #
+      #   Requires merchant facade token
+      #
       #  @example
       #    client.refund_invoice(id: 'JB49z2MsDH7FunczeyDS8j', params: {amount: 10, currency: 'USD', bitcoinAddress: '1Jtcygf8W3cEmtGgepggtjCxtmFFjrZwRV'})
       #
@@ -94,21 +101,29 @@ module BitPay
         response["data"]
       end
       
-      ## Get Refunds for Invoice
-      #
+      ## Get All Refunds for Invoice
       #   Returns an array of all refund requests for a specific invoice, 
-      #   or the specified refund request if request_id is specified
+      # 
+      #   Requires merchant facade token
       #
       #  @example:
-      #    client.get_refunds_for_invoice(id: 'JB49z2MsDH7FunczeyDS8j')
-      #    client.get_refunds_for_invoice(id: 'JB49z2MsDH7FunczeyDS8j', request_id: '4evCrXq4EDXk4oqDXdWQhX')
+      #    client.get_all_refunds_for_invoice(id: 'JB49z2MsDH7FunczeyDS8j')
       #
-      def get_refunds_for_invoice(id:, request_id: nil)
-        if request_id
-          urlpath = "invoices/#{id}/refunds/#{request_id}"
-        else
-          urlpath = "invoices/#{id}/refunds"
-        end
+      def get_all_refunds_for_invoice(id:)
+        urlpath = "invoices/#{id}/refunds"
+        invoice = get_invoice(id: id)
+        response = send_request("GET", urlpath, facade: nil, token: invoice["token"])
+        response["data"]
+      end
+
+      ## Get Refund
+      #   Requires merchant facade token
+      #
+      #  @example:
+      #    client.get_refund(id: 'JB49z2MsDH7FunczeyDS8j', request_id: '4evCrXq4EDXk4oqDXdWQhX')
+      #
+      def get_refund(id:, request_id:)
+        urlpath = "invoices/#{id}/refunds/#{request_id}"
         invoice = get_invoice(id: id)
         response = send_request("GET", urlpath, facade: nil, token: invoice["token"])
         response["data"]
@@ -122,8 +137,10 @@ module BitPay
         @tokens.each{|key, value| return false if server_tokens[key] != value}
         return true
       end
+      
       ## Generates REST request to api endpoint
-
+      # =>  Defaults to merchant facade unless token or facade is explicitly provided
+      #
       def send_request(verb, path, facade: 'merchant', params: {}, token: nil)
         token ||= get_token(facade)
 

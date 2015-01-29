@@ -131,24 +131,33 @@ describe BitPay::SDK::Client do
     end
   end
   
-  describe '#get_refunds_for_invoice' do
+  describe '#get_all_refunds_for_invoice' do
     subject { bitpay_client }
     before {stub_const('ENV', {'BITPAY_PEM' => PEM})}
-    it { is_expected.to respond_to(:get_refunds_for_invoice) }  
+    it { is_expected.to respond_to(:get_all_refunds_for_invoice) }  
     
     it 'should get the token for the invoice' do
-      bitpay_client.get_refunds_for_invoice(id: 'TEST_INVOICE_ID')
+      bitpay_client.get_all_refunds_for_invoice(id: 'TEST_INVOICE_ID')
       expect(WebMock).to have_requested :get, "#{BitPay::TEST_API_URI}/invoices/TEST_INVOICE_ID?token=MERCHANT_TOKEN"
     end
-    it 'should GET all refunds when no request is specified' do
-      bitpay_client.get_refunds_for_invoice(id: 'TEST_INVOICE_ID')
+    it 'should GET all refunds' do
+      bitpay_client.get_all_refunds_for_invoice(id: 'TEST_INVOICE_ID')
       expect(WebMock).to have_requested :get, "#{BitPay::TEST_API_URI}/invoices/TEST_INVOICE_ID/refunds?token=MERCHANT_INVOICE_TOKEN"
     end
-    it 'should GET a single refund when the request_id is specified' do
-      bitpay_client.get_refunds_for_invoice(id: 'TEST_INVOICE_ID', request_id: 'TEST_REQUEST_ID')
+  end
+    
+  describe '#get_refund' do
+    subject { bitpay_client }
+    before {stub_const('ENV', {'BITPAY_PEM' => PEM})}
+    it { is_expected.to respond_to(:get_refund) }  
+    it 'should get the token for the invoice' do
+      bitpay_client.get_refund(id: 'TEST_INVOICE_ID', request_id: 'TEST_REQUEST_ID')
+      expect(WebMock).to have_requested :get, "#{BitPay::TEST_API_URI}/invoices/TEST_INVOICE_ID?token=MERCHANT_TOKEN"
+    end        
+    it 'should GET a single refund' do
+      bitpay_client.get_refund(id: 'TEST_INVOICE_ID', request_id: 'TEST_REQUEST_ID')
       expect(WebMock).to have_requested :get, "#{BitPay::TEST_API_URI}/invoices/TEST_INVOICE_ID/refunds/TEST_REQUEST_ID?token=MERCHANT_INVOICE_TOKEN"
     end
-    
   end
 
   describe '#set_token' do

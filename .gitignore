@@ -7,3 +7,4 @@ pkg
 .ruby-gemset
 *.swo
 *.swp
+bitpaykey.pem

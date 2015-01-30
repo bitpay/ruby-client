@@ -29,6 +29,7 @@ Given(/^the user is paired with BitPay$/) do
   raise "Client is not paired" unless @client.verify_token
 end
 
+
 Given(/^the user has a bad pairing_code "(.*?)"$/) do |arg1|
     # This is a no-op, pairing codes are transient and never actually saved
 end
@@ -49,3 +50,12 @@ Then(/^they will receive an? (.*?) matching "(.*?)"$/) do |error_class, error_me
   raise "Error: #{@error.class}, message: #{@error.message}" unless Object.const_get(error_class) == @error.class && @error.message.include?(error_message)
 end
 
+Given(/^the user requests a client\-side pairing$/) do
+  pem = BitPay::KeyUtils.generate_pem
+  client = BitPay::SDK::Client.new(api_uri: ROOT_ADDRESS, pem: pem, insecure: true)
+  @response = client.pair_client({})
+end
+
+Then(/^they will receive a claim code$/) do
+  expect(@response["data"].first["pairingCode"] ).not_to be_empty
+end

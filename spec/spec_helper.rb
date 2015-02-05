@@ -15,20 +15,6 @@ PEM = "-----BEGIN EC PRIVATE KEY-----\nMHQCAQEEICg7E4NN53YkaWuAwpoqjfAofjzKI7Jq1
 PUB_KEY = '038d970d6ba29dcfa190c177140fd889fadd6d2590b1ee1a6a06e255dbf22b4017'
 CLIENT_ID = "TeyN4LPrXiG5t2yuSamKqP3ynVk3F52iHrX"
 
-
-RSpec.configure do |config|
-  config.before :each do |example|
-    WebMock.allow_net_connect! if example.metadata[:type] == :feature 
-  end
-
-  config.after :each do |example|
-    if example.metadata[:type] == :feature and example.exception
-      save_and_open_screenshot
-    end
-  end
-
-end
-
 def an_illegal_claim_code
   legal_map = [*'A'..'Z'] + [*'a'..'z'] + [*0..9]
   first_length = rand(6)

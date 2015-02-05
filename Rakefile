@@ -10,10 +10,17 @@ require_relative 'config/capybara.rb'
 
 RSpec::Core::RakeTask.new(:spec)
 
-task :default => :spec
+#task :default => :spec
+task :default => :default_tasks
 
 Cucumber::Rake::Task.new(:features) do |t|
     t.cucumber_opts = "features --format pretty"
+end
+
+desc "Run BitPay tests"
+task :default_tasks do
+  Rake::Task["spec"].invoke
+  Rake::Task["features"].invoke
 end
 
 desc "Bitpay Tasks"

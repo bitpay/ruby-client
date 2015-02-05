@@ -19,17 +19,20 @@ module BitPay
       #  # Create a client with a pem file created by the bitpay client:
       #  client = BitPay::SDK::Client.new
       def initialize(opts={})
-        @pem               = opts[:pem] || ENV['BITPAY_PEM'] || KeyUtils.generate_pem 
-        @key               = KeyUtils.create_key @pem
-        @priv_key          = KeyUtils.get_private_key @key
-        @pub_key           = KeyUtils.get_public_key @key
-        @client_id         = KeyUtils.generate_sin_from_pem @pem
-        @uri               = URI.parse opts[:api_uri] || API_URI
-        @user_agent        = opts[:user_agent] || USER_AGENT
-        @https             = Net::HTTP.new @uri.host, @uri.port
-        @https.use_ssl     = true
-        @https.ca_file     = CA_FILE
-        @tokens            = opts[:tokens] || {}
+        @pem                = opts[:pem] || ENV['BITPAY_PEM'] || KeyUtils.generate_pem 
+        @key                = KeyUtils.create_key @pem
+        @priv_key           = KeyUtils.get_private_key @key
+        @pub_key            = KeyUtils.get_public_key @key
+        @client_id          = KeyUtils.generate_sin_from_pem @pem
+        @uri                = URI.parse opts[:api_uri] || API_URI
+        @user_agent         = opts[:user_agent] || USER_AGENT
+        @https              = Net::HTTP.new @uri.host, @uri.port
+        @https.use_ssl      = true
+        @https.open_timeout = 10
+        @https.read_timeout = 10
+
+        @https.ca_file      = CA_FILE
+        @tokens             = opts[:tokens] || {}
 
         # Option to disable certificate validation in extraordinary circumstance.  NOT recommended for production use
         @https.verify_mode = opts[:insecure] == true ? OpenSSL::SSL::VERIFY_NONE : OpenSSL::SSL::VERIFY_PEER
@@ -132,9 +135,15 @@ module BitPay
       def set_token
       end
 
-      def verify_token
-        server_tokens = load_tokens
-        @tokens.each{|key, value| return false if server_tokens[key] != value}
+      ## Checks that the passed tokens are valid by
+      #  comparing them to those that are authorized by the server
+      #
+      #  Uses local @tokens variable if no tokens are passed
+      #  in order to validate the connector is properly paired
+      #
+      def verify_tokens(tokens: @tokens)
+        server_tokens = refresh_tokens
+        tokens.each{|key, value| return false if server_tokens[key] != value}
         return true
       end
       
@@ -202,10 +211,10 @@ module BitPay
           
       end
 
-      ## Requests token by appending nonce and signing URL
-      #  Returns a hash of available tokens
+      ## Fetches the tokens hash from the server and
+      #  updates @tokens
       #
-      def load_tokens
+      def refresh_tokens
         urlpath = '/tokens'
 
         request = Net::HTTP::Get.new(urlpath)
@@ -213,7 +222,6 @@ module BitPay
         request['X-Signature'] = KeyUtils.sign(@uri.to_s + urlpath, @priv_key)
 
         response = process_request(request)
-
         token_array = response["data"] || {}
 
         tokens = {}
@@ -242,7 +250,7 @@ module BitPay
       end
 
       def get_token(facade)
-        token = @tokens[facade] || load_tokens[facade] || raise(BitPayError, "Not authorized for facade: #{facade}")
+        token = @tokens[facade] || refresh_tokens[facade] || raise(BitPayError, "Not authorized for facade: #{facade}")
       end
 
       def verify_claim_code(claim_code)

@@ -1,9 +1,9 @@
 When(/^the user (?:tries to |)creates? an invoice (?:for|without) "(.*?)" (?:or |and |)"(.*?)"$/) do |price, currency|
   begin
     @response = @client.create_invoice(price: price, currency: currency)
-  rescue => error
-    @error = error
-  end
+   rescue BitPay::ArgumentError, BitPay::ConnectionError => error
+     @error = error
+   end
 end
 
 Then(/^they should recieve an invoice in response for "(.*?)" "(.*?)"$/) do |price, currency|
@@ -15,7 +15,7 @@ Given(/^there is an invalid token$/) do
 end
 
 Given(/^that a user knows an invoice id$/) do
-  client = new_paired_client
+  client = new_client_from_stored_values
   @id = (client.create_invoice(price: 100, currency: "USD" ))['id']
 end
 

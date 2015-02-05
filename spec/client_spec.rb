@@ -169,10 +169,10 @@ describe BitPay::SDK::Client do
     end
   end
 
-  describe "#verify_token" do
+  describe "#verify_tokens" do
     subject { bitpay_client }
     before {stub_const('ENV', {'BITPAY_PEM' => PEM})}
-    it { is_expected.to respond_to(:verify_token) }
+    it { is_expected.to respond_to(:verify_tokens) }
   end
 end
 

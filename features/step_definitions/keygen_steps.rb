@@ -5,6 +5,7 @@ When(/^the user pairs with BitPay(?: with a valid pairing code|)$/) do
   claim_code = get_claim_code_from_server
   pem = BitPay::KeyUtils.generate_pem
   @client = BitPay::SDK::Client.new(api_uri: ROOT_ADDRESS, pem: pem, insecure: true)
+  sleep 1 # rate limit compliance
   @token = @client.pair_pos_client(claim_code)
 end
 
@@ -13,9 +14,10 @@ When(/^the fails to pair with BitPay because of an incorrect port$/) do
   address = ROOT_ADDRESS.split(':').slice(0,2).join(':') + ":999"
   client = BitPay::SDK::Client.new(api_uri: address, pem: pem, insecure: true)
   begin
+    sleep 1 # rate limit compliance
     client.pair_pos_client("1ab2c34")
     raise "pairing unexpectedly worked"
-  rescue => error
+  rescue BitPay::ConnectionError => error
     @error = error
     true
   end
@@ -26,7 +28,7 @@ Given(/^the user is authenticated with BitPay$/) do
 end
 
 Given(/^the user is paired with BitPay$/) do
-  raise "Client is not paired" unless @client.verify_token
+  raise "Client is not paired" unless @client.verify_tokens
 end
 
 
@@ -38,9 +40,10 @@ Then(/^the user fails to pair with a semantically (?:in|)valid code "(.*?)"$/) d
   pem = BitPay::KeyUtils.generate_pem
   client = BitPay::SDK::Client.new(api_uri: ROOT_ADDRESS, pem: pem, insecure: true)
   begin
+    sleep 1 # rate limit compliance
     client.pair_pos_client(code)
     raise "pairing unexpectedly worked"
-  rescue => error
+  rescue BitPay::ArgumentError => error
     @error = error
     true
   end

@@ -16,7 +16,7 @@ end
 
 Given(/^that a user knows an invoice id$/) do
   client = new_client_from_stored_values
-  @id = (client.create_invoice(price: 100, currency: "USD" ))['id']
+  @id = (client.create_invoice(price: 3, currency: "USD" ))['id']
 end
 
 Then(/^they can retrieve that invoice$/) do

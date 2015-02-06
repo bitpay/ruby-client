@@ -30,10 +30,10 @@ def get_claim_code_from_server
   end
   Capybara::find(:xpath, '//ion-item[contains(@ng-click, "settings")]').click
   Capybara::find(:xpath, '//span[contains(text(), "API Tokens")]').click
-  sleep 2 # Wait for frame to transition
+  sleep 4 # Wait for frame to transition
   Capybara::current_session.within_frame 0 do
     Capybara::find(".token-access-new-button").find(".btn").find(".icon-plus").click
-    sleep 0.5
+    sleep 2
     Capybara::find_button("Add Token", match: :first).click
     sleep 2
     claim_code = Capybara::find(".token-claimcode", match: :first).text

@@ -3,15 +3,21 @@ Powerful, flexible, lightweight interface to the BitPay Bitcoin Payment Gateway 
 
 ## Installation
 
-    gem install bitpay-sdk
-    
+```bash
+gem install bitpay-sdk
+```
+
 In your Gemfile:
 
-    gem 'bitpay-sdk', :require => 'bitpay_sdk'
+```ruby
+gem 'bitpay-sdk', :require => 'bitpay_sdk'
+```
 
 Or directly:
 
-    require 'bitpay_sdk'
+```ruby
+require 'bitpay_sdk'
+```
 
 ## Configuration
 
@@ -26,37 +32,45 @@ To pair with bitpay.com you need to have an approved merchant account.
 2. Navigate to bitpay.com/api-tokens (Dashboard > My Account > API Tokens)  
 3. Create a new token and copy the pairing code.  
 
-    client = BitPay::Client.new
-    client.pair_pos_client(<pairing_code>)
-    invoice = client.create_invoice (price: <price>, currency: <currency>)
+```ruby
+client = BitPay::Client.new
+client.pair_pos_client(<pairing_code>)
+invoice = client.create_invoice (price: <price>, currency: <currency>)
+```
 
 With invoice creation, `price` and `currency` are the only required fields. If you are sending a customer from your website to make a purchase, setting `redirectURL` will redirect the customer to your website when the invoice is paid.
 
 Response will be a hash with information on your newly created invoice. Send your customer to the `url` to complete payment:
 
-    {
-      "id"             => "DGrAEmbsXe9bavBPMJ8kuk", 
-      "url"            => "https://bitpay.com/invoice?id=DGrAEmbsXe9bavBPMJ8kuk",
-      "status"         => "new",
-      "btcPrice"       => "0.0495",
-      "price"          => 10,
-      "currency"       => "USD",
-      "invoiceTime"    => 1383265343674,
-      "expirationTime" => 1383266243674,
-      "currentTime"    => 1383265957613
-    }
+```javascript
+{
+  "id"             => "DGrAEmbsXe9bavBPMJ8kuk", 
+  "url"            => "https://bitpay.com/invoice?id=DGrAEmbsXe9bavBPMJ8kuk",
+  "status"         => "new",
+  "btcPrice"       => "0.0495",
+  "price"          => 10,
+  "currency"       => "USD",
+  "invoiceTime"    => 1383265343674,
+  "expirationTime" => 1383266243674,
+  "currentTime"    => 1383265957613
+}
+```
 
 There are many options available when creating invoices, which are listed in the [BitPay API documentation](https://bitpay.com/bitcoin-payment-gateway-api).
 
 To get updated information on this invoice, make a get call with the id returned:
 
-    invoice = client.get_public_invoice(id: 'DGrAEmbsXe9bavBPMJ8kuk')
+```ruby
+invoice = client.get_public_invoice(id: 'DGrAEmbsXe9bavBPMJ8kuk')
+```
 
 ## Testnet Usage
 
 During development and testing, take advantage of the [Bitcoin TestNet](https://en.bitcoin.it/wiki/Testnet) by passing a custom `api_uri` option on initialization:
 
-    BitPay::Client.new(api_uri: "https://test.bitpay.com/api")
+```ruby
+BitPay::Client.new(api_uri: "https://test.bitpay.com/api")
+```
 
 ## API Documentation
 
@@ -67,10 +81,12 @@ API Documentation is available on the [BitPay site](https://bitpay.com/api).
 In order to run the tests, you must have phantomjs installed and on your PATH.
 
 The tests require that environment variables be set for the bitpay server, user name, and password. First run:
-    
-    $ source ./spec/set_constants.sh https://test.bitpay.com <yourusername> <yourpassword>
-    $ bundle install
-    $ bundle exec rake
+
+```bash 
+$ source ./spec/set_constants.sh https://test.bitpay.com <yourusername> <yourpassword>
+$ bundle install
+$ bundle exec rake
+```
 
 Tests are likely to run up against rate limiters on test.bitpay.com if used too frequently. Rake tasks which interact directly with BitPay will not run for the general public.
 

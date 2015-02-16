@@ -1,17 +1,12 @@
 require 'capybara/poltergeist'
 require 'pry'
+require 'fileutils' 
 
 require File.join File.dirname(__FILE__), '..', '..', 'lib', 'bitpay_sdk.rb'
 require_relative '../../config/constants.rb'
 require_relative '../../config/capybara.rb'
 
-#
-## Test Variables
-#
-#PEM = "-----BEGIN EC PRIVATE KEY-----\nMHQCAQEEICg7E4NN53YkaWuAwpoqjfAofjzKI7Jq1f532dX+0O6QoAcGBSuBBAAK\noUQDQgAEjZcNa6Kdz6GQwXcUD9iJ+t1tJZCx7hpqBuJV2/IrQBfue8jh8H7Q/4vX\nfAArmNMaGotTpjdnymWlMfszzXJhlw==\n-----END EC PRIVATE KEY-----\n"
-#
-#PUB_KEY = '038d970d6ba29dcfa190c177140fd889fadd6d2590b1ee1a6a06e255dbf22b4017'
-#CLIENT_ID = "TeyN4LPrXiG5t2yuSamKqP3ynVk3F52iHrX"
+
 module BitPay
   # Location for API Credentials
   BITPAY_CREDENTIALS_DIR = File.join(Dir.home, ".bitpay")
@@ -21,15 +16,17 @@ module BitPay
   TOKEN_FILE_PATH = File.join(BITPAY_CREDENTIALS_DIR, TOKEN_FILE)
 end
 
+# Lots of sleeps in here to deal with finicky transitions and PhantomJS
 def get_claim_code_from_server
+  sleep 2
   Capybara::visit ROOT_ADDRESS
-  if logged_in
-    Capybara::visit "#{ROOT_ADDRESS}/dashboard/merchant/home"
-  else
-    log_in
-  end
-  Capybara::find(:xpath, '//ion-item[contains(@ng-click, "settings")]').click
-  Capybara::find(:xpath, '//span[contains(text(), "API Tokens")]').click
+  sleep 2
+  log_in unless logged_in
+  sleep 1
+  Capybara::visit DASHBOARD_URL
+  sleep 1
+  raise "Bad Login" unless Capybara.current_session.current_url == DASHBOARD_URL
+  Capybara::visit "#{ROOT_ADDRESS}/dashboard/merchant/api-tokens"
   sleep 4 # Wait for frame to transition
   Capybara::current_session.within_frame 0 do
     Capybara::find(".token-access-new-button").find(".btn").find(".icon-plus").click
@@ -61,6 +58,7 @@ def new_client_from_stored_values
     client = BitPay::SDK::Client.new(api_uri: ROOT_ADDRESS, pem: pem, insecure: true)
     sleep 1 # rate limit compliance
     token = client.pair_pos_client(claim_code)
+    FileUtils.mkdir_p(BitPay::BITPAY_CREDENTIALS_DIR)
     File.write(BitPay::PRIVATE_KEY_PATH, pem)
     File.write(BitPay::TOKEN_FILE_PATH, JSON.generate(token))
   end   

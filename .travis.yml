@@ -1,5 +1,2 @@
 rvm:
 - 2.1.0
-before_script:
-- mkdir ~/.bitpay
-- openssl ecparam -genkey -name secp256k1 -noout -out ~/.bitpay/bitpay.pem

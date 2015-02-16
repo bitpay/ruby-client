@@ -17,7 +17,7 @@ When(/^the fails to pair with BitPay because of an incorrect port$/) do
     sleep 1 # rate limit compliance
     client.pair_pos_client("1ab2c34")
     raise "pairing unexpectedly worked"
-  rescue BitPay::ConnectionError => error
+  rescue => error
     @error = error
     true
   end
@@ -43,7 +43,7 @@ Then(/^the user fails to pair with a semantically (?:in|)valid code "(.*?)"$/) d
     sleep 1 # rate limit compliance
     client.pair_pos_client(code)
     raise "pairing unexpectedly worked"
-  rescue BitPay::ArgumentError => error
+  rescue => error
     @error = error
     true
   end

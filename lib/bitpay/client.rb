@@ -131,9 +131,6 @@ module BitPay
         response = send_request("GET", urlpath, facade: nil, token: invoice["token"])
         response["data"]
       end
-      
-      def set_token
-      end
 
       ## Checks that the passed tokens are valid by
       #  comparing them to those that are authorized by the server

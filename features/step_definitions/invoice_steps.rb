@@ -1,7 +1,7 @@
 When(/^the user (?:tries to |)creates? an invoice (?:for|without) "(.*?)" (?:or |and |)"(.*?)"$/) do |price, currency|
   begin
     @response = @client.create_invoice(price: price, currency: currency)
-   rescue BitPay::ArgumentError, BitPay::ConnectionError => error
+   rescue => error
      @error = error
    end
 end

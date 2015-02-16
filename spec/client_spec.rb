@@ -160,15 +160,6 @@ describe BitPay::SDK::Client do
     end
   end
 
-  describe '#set_token' do
-    subject { bitpay_client }
-    before {stub_const('ENV', {'BITPAY_PEM' => PEM})}
-    it { is_expected.to respond_to(:set_token) }
-    it 'sets a token in the client' do
-
-    end
-  end
-
   describe "#verify_tokens" do
     subject { bitpay_client }
     before {stub_const('ENV', {'BITPAY_PEM' => PEM})}

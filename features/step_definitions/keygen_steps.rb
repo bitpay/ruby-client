@@ -54,6 +54,7 @@ Then(/^they will receive an? (.*?) matching "(.*?)"$/) do |error_class, error_me
 end
 
 Given(/^the user requests a client\-side pairing$/) do
+  sleep 1
   pem = BitPay::KeyUtils.generate_pem
   client = BitPay::SDK::Client.new(api_uri: ROOT_ADDRESS, pem: pem, insecure: true)
   @response = client.pair_client({})

@@ -18,31 +18,31 @@ end
 
 # Lots of sleeps in here to deal with finicky transitions and PhantomJS
 def get_claim_code_from_server
-  sleep 2
   Capybara::visit ROOT_ADDRESS
-  sleep 2
   log_in unless logged_in
-  sleep 1
   Capybara::visit DASHBOARD_URL
-  sleep 1
   raise "Bad Login" unless Capybara.current_session.current_url == DASHBOARD_URL
-  Capybara::visit "#{ROOT_ADDRESS}/dashboard/merchant/api-tokens"
-  sleep 4 # Wait for frame to transition
-  Capybara::current_session.within_frame 0 do
-    Capybara::find(".token-access-new-button").find(".btn").find(".icon-plus").click
-    sleep 2
-    Capybara::find_button("Add Token", match: :first).click
-    sleep 2
-    claim_code = Capybara::find(".token-claimcode", match: :first).text
-    return claim_code
-  end
+  Capybara::visit "#{ROOT_ADDRESS}/api-tokens"
+  Capybara::find(".token-access-new-button").find(".btn").find(".icon-plus").click
+  sleep 0.25
+  Capybara::find_button("Add Token", match: :first).click
+  Capybara::find(".token-claimcode", match: :first).text
 end
 
 def log_in
-  Capybara::click_link('Login')
+  Capybara::visit "#{ROOT_ADDRESS}/dashboard/login/"
   Capybara::fill_in 'email', :with => TEST_USER
   Capybara::fill_in 'password', :with => TEST_PASS
   Capybara::click_button('Login')
+  Capybara::find(".ion-gear-a", match: :first)
+end
+
+def new_paired_client
+  claim_code = get_claim_code_from_server
+  pem = BitPay::KeyUtils.generate_pem
+  client = BitPay::SDK::Client.new(api_uri: ROOT_ADDRESS, pem: pem, insecure: true)
+  client.pair_pos_client(claim_code)
+  client
 end
 
 def new_client_from_stored_values

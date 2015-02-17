@@ -15,12 +15,15 @@ PEM = "-----BEGIN EC PRIVATE KEY-----\nMHQCAQEEICg7E4NN53YkaWuAwpoqjfAofjzKI7Jq1
 PUB_KEY = '038d970d6ba29dcfa190c177140fd889fadd6d2590b1ee1a6a06e255dbf22b4017'
 CLIENT_ID = "TeyN4LPrXiG5t2yuSamKqP3ynVk3F52iHrX"
 
-def an_illegal_claim_code
+def generate_code(number)
   legal_map = [*'A'..'Z'] + [*'a'..'z'] + [*0..9]
-  first_length = rand(6)
-  short_code = (0..first_length).map{legal_map.sample}.join
-  second_length = [*8..25].sample
-  long_code = [*8..25].sample.times.inject([]){|arr| arr << legal_map.sample}.join
+  Array.new(number) { legal_map.sample }.join
+end
+
+  
+def an_illegal_claim_code
+  short_code = generate_code(rand(6))
+  long_code  = generate_code(rand(8..25))
   [nil, short_code, long_code].sample
 end
 

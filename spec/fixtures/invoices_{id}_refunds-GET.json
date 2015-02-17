@@ -1,0 +1,17 @@
+{
+  "facade": "merchant/supportRequest",
+  "data": [
+    {
+      "id": "TEST_REQUEST_ID",
+      "requestDate": "2015-01-27T00:36:12.360Z",
+      "status": "pending",
+      "token": "REFUND_REQUEST_TOKEN"
+    },
+    {
+      "id": "ANOTHER_ID",
+      "requestDate": "2015-01-27T00:36:12.360Z",
+      "status": "OTHER_STATUS",
+      "token": "ANOTHER_REFUND_REQUEST_TOKEN"
+    }    
+  ]
+}

@@ -24,7 +24,7 @@ def get_claim_code_from_server
   raise "Bad Login" unless Capybara.current_session.current_url == DASHBOARD_URL
   Capybara::visit "#{ROOT_ADDRESS}/api-tokens"
   Capybara::find(".token-access-new-button").find(".btn").find(".icon-plus").click
-  sleep 0.25
+  sleep 0.50
   Capybara::find_button("Add Token", match: :first).click
   Capybara::find(".token-claimcode", match: :first).text
 end
@@ -33,7 +33,7 @@ def log_in
   Capybara::visit "#{ROOT_ADDRESS}/dashboard/login/"
   Capybara::fill_in 'email', :with => TEST_USER
   Capybara::fill_in 'password', :with => TEST_PASS
-  Capybara::click_button('Login')
+  Capybara::click_on('Login')
   Capybara::find(".ion-gear-a", match: :first)
 end
 

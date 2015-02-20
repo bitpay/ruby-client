@@ -1,0 +1,35 @@
+{
+  "facade": "merchant/invoice",
+  "data": {
+    "url": "https://test.bitpay.com/invoice?id=CcRgegwTMs866Sr7vdLnru",
+    "status": "complete",
+    "btcPrice": "0.074661",
+    "btcDue": "0.000000",
+    "price": 15.79,
+    "currency": "USD",
+    "exRates": {
+      "USD": 211.49
+    },
+    "invoiceTime": 1421719631301,
+    "expirationTime": 1421720531301,
+    "currentTime": 1422316288768,
+    "id": "TEST_INVOICE_ID",
+    "btcPaid": "0.074661",
+    "rate": 211.49,
+    "exceptionStatus": false,
+    "transactions": [
+      {
+        "amount": 7466100,
+        "confirmations": 6,
+        "time": "2015-01-20T02:07:46.000Z",
+        "receivedTime": "2015-01-20T02:07:45.881Z"
+      }
+    ],
+    "flags": {
+      "refundable": true
+    },
+    "token": "MERCHANT_INVOICE_TOKEN",
+    "buyer": {
+    }
+  }
+}

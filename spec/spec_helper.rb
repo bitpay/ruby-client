@@ -15,18 +15,21 @@ PEM = "-----BEGIN EC PRIVATE KEY-----\nMHQCAQEEICg7E4NN53YkaWuAwpoqjfAofjzKI7Jq1
 PUB_KEY = '038d970d6ba29dcfa190c177140fd889fadd6d2590b1ee1a6a06e255dbf22b4017'
 CLIENT_ID = "TeyN4LPrXiG5t2yuSamKqP3ynVk3F52iHrX"
 
-
-RSpec.configure do |config|
-  config.before :each do |example|
-    WebMock.allow_net_connect! if example.metadata[:type] == :feature 
-  end
+def generate_code(number)
+  legal_map = [*'A'..'Z'] + [*'a'..'z'] + [*0..9]
+  Array.new(number) { legal_map.sample }.join
 end
 
+  
 def an_illegal_claim_code
-  legal_map = [*'A'..'Z'] + [*'a'..'z'] + [*0..9]
-  first_length = rand(6)
-  short_code = (0..first_length).map{legal_map.sample}.join
-  second_length = [*8..25].sample
-  long_code = [*8..25].sample.times.inject([]){|arr| arr << legal_map.sample}.join
+  short_code = generate_code(rand(6))
+  long_code  = generate_code(rand(8..25))
   [nil, short_code, long_code].sample
+end
+
+## Gets JSON responses from the fixtures directory
+#
+def get_fixture(name)
+  #JSON.parse(File.read(File.expand_path("../fixtures/#{name}",  __FILE__)))
+  File.read(File.expand_path("../fixtures/#{name}",  __FILE__))
 end

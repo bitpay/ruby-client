@@ -61,5 +61,5 @@ Given(/^the user requests a client\-side pairing$/) do
 end
 
 Then(/^they will receive a claim code$/) do
-  expect(@response["data"].first["pairingCode"] ).not_to be_empty
+  expect(@response.first["pairingCode"] ).not_to be_empty
 end

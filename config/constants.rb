@@ -11,9 +11,9 @@ TEST_PASS = ENV['RCTESTPASSWORD']
 DASHBOARD_URL = "#{ROOT_ADDRESS}/dashboard/merchant/home"
 
 unless
-	ROOT_ADDRESS &&
-	TEST_USER &&
-	TEST_PASS
+  ROOT_ADDRESS &&
+  TEST_USER &&
+  TEST_PASS
 then
-	raise "Missing configuration options - see constants.rb"
+  raise "Missing configuration options - see constants.rb"
 end

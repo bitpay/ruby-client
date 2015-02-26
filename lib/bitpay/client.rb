@@ -1,4 +1,4 @@
-# license Copyright 2011-2014 BitPay, Inc., MIT License
+# license Copyright 2011-2015 BitPay, Inc., MIT License
 # see http://opensource.org/licenses/MIT
 # or https://github.com/bitpay/php-bitpay-client/blob/master/LICENSE
 
@@ -7,13 +7,14 @@ require 'net/https'
 require 'json'
 
 require_relative 'key_utils'
+require_relative 'rest_connector'
 
 module BitPay
   # This class is used to instantiate a BitPay Client object. It is expected to be thread safe.
   #
   module SDK
     class Client
-      
+      include BitPay::RestConnector 
       # @return [Client]
       # @example
       #  # Create a client with a pem file created by the bitpay client:
@@ -46,7 +47,7 @@ module BitPay
       # => Pass {pairingCode: 'WfD01d2'} to claim a server-initiated pairing code
       #
       def pair_client(params={})
-        pairing_request(params)
+        post(path: 'tokens', params: params)
       end
 
       ## Compatibility method for pos pairing
@@ -64,24 +65,14 @@ module BitPay
         raise BitPay::ArgumentError, "Illegal Argument: Price must be formatted as a float" unless ( price.is_a?(Numeric) || /^[[:digit:]]+(\.[[:digit:]]{2})?$/.match(price) )
         raise BitPay::ArgumentError, "Illegal Argument: Currency is invalid." unless /^[[:upper:]]{3}$/.match(currency)
         params.merge!({price: price, currency: currency})
-        response = send_request("POST", "invoices", facade: facade, params: params)
-        response["data"]
+        token = get_token(facade)
+        post(path: "invoices", token: token, params: params)
       end
 
-      ## Gets the privileged merchant-version of the invoice
-      #   Requires merchant facade token
-      #
-      def get_invoice(id:)
-        response = send_request("GET", "invoices/#{id}", facade: 'merchant')
-        response["data"]        
-      end
-      
       ## Gets the public version of the invoice
       #
       def get_public_invoice(id:)
-        request = Net::HTTP::Get.new("/invoices/#{id}")
-        response = process_request(request)
-        response["data"]
+        get(path: "invoices/#{id}", public: true)
       end
       
       ## Checks that the passed tokens are valid by
@@ -95,116 +86,12 @@ module BitPay
         tokens.each{|key, value| return false if server_tokens[key] != value}
         return true
       end
-      
-      ## Generates REST request to api endpoint
-      # =>  Defaults to merchant facade unless token or facade is explicitly provided
-      #
-      def send_request(verb, path, facade: 'merchant', params: {}, token: nil)
-        token ||= get_token(facade)
 
-        # Verb-specific logic
-        case verb.upcase
-          when "GET"
-            urlpath = '/' + path + '?token=' + token
-            request = Net::HTTP::Get.new urlpath
-            request['X-Signature'] = KeyUtils.sign(@uri.to_s + urlpath, @priv_key)
-
-          when "PUT"
-
-          when "POST"  # Requires a GUID
-
-            urlpath = '/' + path
-            request = Net::HTTP::Post.new urlpath
-            params[:token] = token
-            params[:guid]  = SecureRandom.uuid
-            params[:id] = @client_id
-            request.body = params.to_json
-            request['X-Signature'] = KeyUtils.sign(@uri.to_s + urlpath + request.body, @priv_key)
-
-          when "DELETE"
-         
-            raise(BitPayError, "Invalid HTTP verb: #{verb.upcase}")
-        end
-
-        # Build request headers and submit
-        request['X-Identity'] = @pub_key
-   
-        response = process_request(request)
-      end
-
-  ##### PRIVATE METHODS #####
       private
-
-      ## Processes HTTP Request and returns parsed response
-      # Otherwise throws error
-      #
-      def process_request(request)
-
-        request['User-Agent'] = @user_agent
-        request['Content-Type'] = 'application/json'
-        request['X-BitPay-Plugin-Info'] = 'Rubylib' + VERSION
-
-        begin
-          response = @https.request request
-        rescue => error
-          raise BitPay::ConnectionError, "#{error.message}"
-        end
-
-        if response.kind_of? Net::HTTPSuccess
-          return JSON.parse(response.body)
-        elsif JSON.parse(response.body)["error"]
-          raise(BitPayError, "#{response.code}: #{JSON.parse(response.body)['error']}")
-        else
-          raise BitPayError, "#{response.code}: #{JSON.parse(response.body)}"
-        end
-          
-      end
-
-      ## Fetches the tokens hash from the server and
-      #  updates @tokens
-      #
-      def refresh_tokens
-        urlpath = '/tokens'
-
-        request = Net::HTTP::Get.new(urlpath)
-        request['X-Identity'] = @pub_key
-        request['X-Signature'] = KeyUtils.sign(@uri.to_s + urlpath, @priv_key)
-
-        response = process_request(request)
-        token_array = response["data"] || {}
-
-        tokens = {}
-        token_array.each do |t|
-          tokens[t.keys.first] = t.values.first
-        end
-
-        @tokens = tokens
-        return tokens
-
-      end
-
-      ## Makes a request to /tokens for pairing
-      #     Adds passed params as post parameters
-      #     If empty params, retrieves server-generated pairing code
-      #     If pairingCode key/value is passed, will pair client ID to this account
-      #   Returns response hash
-      #
-      def pairing_request(params)
-        urlpath = '/tokens'
-        request = Net::HTTP::Post.new urlpath
-        params[:guid] = SecureRandom.uuid
-        params[:id] = @client_id
-        request.body = params.to_json
-        process_request(request)
-      end
-
-      def get_token(facade)
-        token = @tokens[facade] || refresh_tokens[facade] || raise(BitPayError, "Not authorized for facade: #{facade}")
-      end
 
       def verify_claim_code(claim_code)
         regex = /^[[:alnum:]]{7}$/
-        matches = regex.match(claim_code)
+          matches = regex.match(claim_code)
         !(matches.nil?)
       end
     end

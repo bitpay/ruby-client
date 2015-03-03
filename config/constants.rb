@@ -10,6 +10,10 @@ TEST_USER = ENV['RCTESTUSER']
 TEST_PASS = ENV['RCTESTPASSWORD']
 DASHBOARD_URL = "#{ROOT_ADDRESS}/dashboard/merchant/home"
 
+# Specify a bitpay txid which has 6+ confirmations.  Default belongs to 'bitpayrubyclient@gmail.com' test account
+REFUND_TRANSACTION = ENV['REFUND_TRANSACTION'] || 'TKKgh3LJuRXnq6hSR3hhNR'
+REFUND_ADDRESS = ENV['REFUND_ADDRESS'] || '2NCMQ8LRu71SfLMYTi8qotg6VRpBZynpFAh'  # Hamish's Testnet Copay Wallet
+
 unless
   ROOT_ADDRESS &&
   TEST_USER &&

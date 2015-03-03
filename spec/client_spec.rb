@@ -19,6 +19,12 @@ describe BitPay::SDK::Client do
         .to_return(:status => 200, :body => tokens.to_json, :headers => {})
       stub_request(:get, "#{BitPay::TEST_API_URI}/invoices/TEST_INVOICE_ID?token=MERCHANT_TOKEN").
         to_return(:body => get_fixture('invoices_{id}-GET.json'))
+      stub_request(:get, "#{BitPay::TEST_API_URI}/invoices/TEST_INVOICE_ID/refunds?token=MERCHANT_INVOICE_TOKEN").
+        to_return(:body => get_fixture('invoices_{id}_refunds-GET.json'))
+      stub_request(:get, "#{BitPay::TEST_API_URI}/invoices/TEST_INVOICE_ID/refunds/TEST_REQUEST_ID?token=MERCHANT_INVOICE_TOKEN").
+        to_return(:body => get_fixture('invoices_{id}_refunds-GET.json'))
+      stub_request(:post, "#{BitPay::TEST_API_URI}/invoices/TEST_INVOICE_ID/refunds").
+        to_return(:body => get_fixture('invoices_{id}_refunds-POST.json'))
   end
 
   describe "#initialize" do
@@ -106,6 +112,51 @@ describe BitPay::SDK::Client do
     
     it 'verifies the validity of the currency argument' do
       expect { bitpay_client.create_invoice(price: "3999", currency: "UASD") }.to raise_error(BitPay::ArgumentError, 'Illegal Argument: Currency is invalid.')
+    end
+  end
+
+  describe '#refund_invoice' do
+    subject { bitpay_client }
+    before { stub_const('ENV', {'BITPAY_PEM' => PEM}) }
+    it { is_expected.to respond_to(:refund_invoice) }
+    
+    it 'should get the token for the invoice' do
+      bitpay_client.refund_invoice(id: 'TEST_INVOICE_ID')
+      expect(WebMock).to have_requested :get, "#{BitPay::TEST_API_URI}/invoices/TEST_INVOICE_ID?token=MERCHANT_TOKEN"
+    end
+    
+    it 'should generate a POST to the invoices/refund endpoint' do
+      bitpay_client.refund_invoice(id: 'TEST_INVOICE_ID')
+      expect(WebMock).to have_requested :post, "#{BitPay::TEST_API_URI}/invoices/TEST_INVOICE_ID/refunds"
+    end
+  end
+  
+  describe '#get_all_refunds_for_invoice' do
+    subject { bitpay_client }
+    before {stub_const('ENV', {'BITPAY_PEM' => PEM})}
+    it { is_expected.to respond_to(:get_all_refunds_for_invoice) }  
+    
+    it 'should get the token for the invoice' do
+      bitpay_client.get_all_refunds_for_invoice(id: 'TEST_INVOICE_ID')
+      expect(WebMock).to have_requested :get, "#{BitPay::TEST_API_URI}/invoices/TEST_INVOICE_ID?token=MERCHANT_TOKEN"
+    end
+    it 'should GET all refunds' do
+      bitpay_client.get_all_refunds_for_invoice(id: 'TEST_INVOICE_ID')
+      expect(WebMock).to have_requested :get, "#{BitPay::TEST_API_URI}/invoices/TEST_INVOICE_ID/refunds?token=MERCHANT_INVOICE_TOKEN"
+    end
+  end
+    
+  describe '#get_refund' do
+    subject { bitpay_client }
+    before {stub_const('ENV', {'BITPAY_PEM' => PEM})}
+    it { is_expected.to respond_to(:get_refund) }  
+    it 'should get the token for the invoice' do
+      bitpay_client.get_refund(id: 'TEST_INVOICE_ID', request_id: 'TEST_REQUEST_ID')
+      expect(WebMock).to have_requested :get, "#{BitPay::TEST_API_URI}/invoices/TEST_INVOICE_ID?token=MERCHANT_TOKEN"
+    end        
+    it 'should GET a single refund' do
+      bitpay_client.get_refund(id: 'TEST_INVOICE_ID', request_id: 'TEST_REQUEST_ID')
+      expect(WebMock).to have_requested :get, "#{BitPay::TEST_API_URI}/invoices/TEST_INVOICE_ID/refunds/TEST_REQUEST_ID?token=MERCHANT_INVOICE_TOKEN"
     end
   end
 

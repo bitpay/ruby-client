@@ -8,9 +8,11 @@ module BitPay
       token ||= get_token(facade)
       case verb.upcase
       when "GET"
-        return get(path: path, token:token)
+        return get(path: path, token: token)
       when "POST"
         return post(path: path, token: token, params: params)
+      when "DELETE"
+        return delete(path: path, token: token)
       else
         raise(BitPayError, "Invalid HTTP verb: #{verb.upcase}")
       end
@@ -38,6 +40,15 @@ module BitPay
         request['X-Signature'] = KeyUtils.sign(@uri.to_s + urlpath + request.body, @priv_key)
         request['X-Identity'] = @pub_key
       end
+      process_request(request)
+    end
+
+    def delete(path:, token: nil)
+      urlpath = '/' + path
+      urlpath = urlpath + '?token=' + token if token
+      request = Net::HTTP::Delete.new urlpath
+      request['X-Signature'] = KeyUtils.sign(@uri.to_s + urlpath, @priv_key) 
+      request['X-Identity'] = @pub_key
       process_request(request)
     end
 

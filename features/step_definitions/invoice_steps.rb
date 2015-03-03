@@ -1,6 +1,6 @@
 When(/^the user (?:tries to |)creates? an invoice (?:for|without) "(.*?)" (?:or |and |)"(.*?)"$/) do |price, currency|
   begin
-    @response = @client.create_invoice(price: price, currency: currency)
+    @response = @client.create_invoice(price: price, currency: currency, facade: 'merchant')
    rescue => error
      @error = error
    end
@@ -15,12 +15,17 @@ Given(/^there is an invalid token$/) do
 end
 
 Given(/^that a user knows an invoice id$/) do
-  client = new_client_from_stored_values
-  @id = (client.create_invoice(price: 3, currency: "USD" ))['id']
+  @client = new_client_from_stored_values
+  @id = (@client.create_invoice(price: 3, currency: "USD", facade: 'merchant' ))['id']
 end
 
-Then(/^they can retrieve that invoice$/) do
-  invoice = BitPay::SDK::Client.new(api_uri: ROOT_ADDRESS, insecure: true).get_public_invoice(id: @id)
+Then(/^they can retrieve the public version of that invoice$/) do
+  invoice = @client.get_public_invoice(id: @id)
+  raise "That's the wrong invoice" unless invoice['id'] == @id
+end
+
+Then(/^they can retrieve the merchant\-scoped version of that invoice$/) do
+  invoice = @client.get_invoice(id: @id)
   raise "That's the wrong invoice" unless invoice['id'] == @id
 end
 

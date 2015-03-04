@@ -1,3 +1,4 @@
+@invoices
 Feature: creating an invoice
   The user won't get any money 
   If they can't
@@ -10,9 +11,10 @@ Feature: creating an invoice
     When the user creates an invoice for <price> <currency>
     Then they should recieve an invoice in response for <price> <currency>
   Examples:
-    | price    | currency |
-    | "5.23" | "USD"    |
+    | price   | currency |
+    | "5.23"  | "USD"    |
     | "10.21" | "EUR"    |
+    | "0.225" | "BTC"    |
 
   Scenario Outline: The invoice contains illegal characters
     When the user creates an invoice for <price> <currency>
@@ -20,7 +22,7 @@ Feature: creating an invoice
   Examples:
     | price    | currency  | message                              |
     | "5,023" | "USD"     | "Price must be formatted as a float" |
-    | "3.21" | "EaUR"    | "Currency is invalid."               |
+    | "3.21"  | "EaUR"    | "Currency is invalid."               |
     | ""       | "USD"     | "Price must be formatted as a float" |
     | "Ten"    | "USD"     | "Price must be formatted as a float" |
     | "10"    | ""        | "Currency is invalid."               |

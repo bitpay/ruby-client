@@ -11,8 +11,6 @@ module BitPay
         return get(path: path, token: token)
       when "POST"
         return post(path: path, token: token, params: params)
-      when "DELETE"
-        return delete(path: path, token: token)
       else
         raise(BitPayError, "Invalid HTTP verb: #{verb.upcase}")
       end

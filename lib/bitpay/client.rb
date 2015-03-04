@@ -61,7 +61,10 @@ module BitPay
       #   Defaults to pos facade, also works with merchant facade
       # 
       def create_invoice(price:, currency:, facade: 'pos', params:{})
-        raise BitPay::ArgumentError, "Illegal Argument: Price must be formatted as a float" unless ( price.is_a?(Numeric) || /^[[:digit:]]+(\.[[:digit:]]{2})?$/.match(price) )
+        raise BitPay::ArgumentError, "Illegal Argument: Price must be formatted as a float" unless 
+          price.is_a?(Numeric) ||
+          /^[[:digit:]]+(\.[[:digit:]]{2})?$/.match(price) ||
+          currency == 'BTC' && /^[[:digit:]]+(\.[[:digit:]]{1,6})?$/.match(price)
         raise BitPay::ArgumentError, "Illegal Argument: Currency is invalid." unless /^[[:upper:]]{3}$/.match(currency)
         params.merge!({price: price, currency: currency})
         response = send_request("POST", "invoices", facade: facade, params: params)

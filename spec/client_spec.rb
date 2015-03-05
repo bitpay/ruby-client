@@ -151,11 +151,11 @@ describe BitPay::SDK::Client do
     before {stub_const('ENV', {'BITPAY_PEM' => PEM})}
     it { is_expected.to respond_to(:get_refund) }  
     it 'should get the token for the invoice' do
-      bitpay_client.get_refund(id: 'TEST_INVOICE_ID', request_id: 'TEST_REQUEST_ID')
+      bitpay_client.get_refund(invoice_id: 'TEST_INVOICE_ID', request_id: 'TEST_REQUEST_ID')
       expect(WebMock).to have_requested :get, "#{BitPay::TEST_API_URI}/invoices/TEST_INVOICE_ID?token=MERCHANT_TOKEN"
     end        
     it 'should GET a single refund' do
-      bitpay_client.get_refund(id: 'TEST_INVOICE_ID', request_id: 'TEST_REQUEST_ID')
+      bitpay_client.get_refund(invoice_id: 'TEST_INVOICE_ID', request_id: 'TEST_REQUEST_ID')
       expect(WebMock).to have_requested :get, "#{BitPay::TEST_API_URI}/invoices/TEST_INVOICE_ID/refunds/TEST_REQUEST_ID?token=MERCHANT_INVOICE_TOKEN"
     end
   end

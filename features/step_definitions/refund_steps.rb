@@ -10,7 +10,7 @@ end
 
 Given(/^the user requests a specific refund$/) do
   client = new_client_from_stored_values
-  @response = client.get_refund(id: REFUND_TRANSACTION, request_id: @refund_id)
+  @response = client.get_refund(invoice_id: REFUND_TRANSACTION, request_id: @refund_id)
 end
 
 Then(/^they will receive the refund$/) do
@@ -29,7 +29,7 @@ end
 Given(/^a properly formatted cancellation request$/) do
   client = new_client_from_stored_values
   @refund_id = client.get_all_refunds_for_invoice(id: REFUND_TRANSACTION).first["id"]
-  @response = client.cancel_refund(id: REFUND_TRANSACTION, request_id: @refund_id)
+  @response = client.cancel_refund(invoice_id: REFUND_TRANSACTION, request_id: @refund_id)
 end
 
 Then(/^the refund will be cancelled$/) do

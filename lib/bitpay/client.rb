@@ -125,9 +125,9 @@ module BitPay
       #  @example:
       #    client.get_refund(id: 'JB49z2MsDH7FunczeyDS8j', request_id: '4evCrXq4EDXk4oqDXdWQhX')
       #
-      def get_refund(id:, request_id:)
-        urlpath = "invoices/#{id}/refunds/#{request_id}"
-        invoice = get_invoice(id: id)
+      def get_refund(invoice_id:, request_id:)
+        urlpath = "invoices/#{invoice_id}/refunds/#{request_id}"
+        invoice = get_invoice(id: invoice_id)
         get(path: urlpath, token: invoice["token"])
       end
       
@@ -137,9 +137,9 @@ module BitPay
       #  @example:
       #    client.cancel_refund(id: 'JB49z2MsDH7FunczeyDS8j', request_id: '4evCrXq4EDXk4oqDXdWQhX')
       #
-      def cancel_refund(id:, request_id:)
-        urlpath = "invoices/#{id}/refunds/#{request_id}"
-        refund = get_refund(id: id, request_id: request_id)
+      def cancel_refund(invoice_id:, request_id:)
+        urlpath = "invoices/#{invoice_id}/refunds/#{request_id}"
+        refund = get_refund(invoice_id: invoice_id, request_id: request_id)
         delete(path: urlpath, token: refund["token"])
       end      
 

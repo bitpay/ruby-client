@@ -64,7 +64,6 @@ def new_client_from_stored_values
     unless client.verify_tokens then 
       raise "Locally stored tokens are invalid, please remove #{BitPay::TOKEN_FILE_PATH}" end
   else
-    claim_code = get_claim_code_from_server
     pem = BitPay::KeyUtils.generate_pem
     client = BitPay::SDK::Client.new(api_uri: ROOT_ADDRESS, pem: pem, insecure: true)
     sleep 1 # rate limit compliance

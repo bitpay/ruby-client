@@ -194,10 +194,10 @@ API Documentation is available on the [BitPay site](https://bitpay.com/api).
 
 In order to run the tests, you must have phantomjs installed and on your PATH.
 
-The tests require that environment variables be set for the bitpay server, user name, and password. First run:
+The tests require that environment variables be set for the bitpay server, user name, password, an invoice id for refunds and a valid testnet bitcoin address for refunds. First run:
 
 ```bash 
-$ source ./spec/set_constants.sh https://test.bitpay.com <yourusername> <yourpassword>
+$ source ./spec/set_constants.sh https://test.bitpay.com <yourusername> <yourpassword> <a-confirmed-invoice-id> <a-valid-testnet-address>
 $ bundle install
 $ bundle exec rake
 ```

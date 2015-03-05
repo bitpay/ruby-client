@@ -6,10 +6,10 @@ Feature: pairing with bitpay
   Scenario: the client has a correct pairing code
     Given the user pairs with BitPay with a valid pairing code
     Then the user is paired with BitPay
-    
+
   Scenario: the client initiates pairing
-    Given the user requests a client-side pairing
-    Then they will receive a claim code
+    Given the user performs a client-side pairing
+    Then the user has a merchant token
 
   Scenario Outline: the client has a bad pairing code
     Given the user fails to pair with a semantically <valid> code <code>

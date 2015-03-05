@@ -29,6 +29,17 @@ def get_claim_code_from_server
   Capybara::find(".token-claimcode", match: :first).text
 end
 
+def approve_token_on_server(pairing_code)
+  Capybara::visit ROOT_ADDRESS
+  log_in unless logged_in
+  Capybara::visit DASHBOARD_URL
+  raise "Bad Login" unless Capybara.current_session.current_url == DASHBOARD_URL
+  Capybara::visit "#{ROOT_ADDRESS}/api-tokens"
+  Capybara::fill_in 'pairingCode', :with => pairing_code
+  Capybara::click_button "Find"
+  Capybara::click_button "Approve"
+end
+
 def log_in
   Capybara::visit "#{ROOT_ADDRESS}/dashboard/login/"
   Capybara::fill_in 'email', :with => TEST_USER
@@ -57,7 +68,12 @@ def new_client_from_stored_values
     pem = BitPay::KeyUtils.generate_pem
     client = BitPay::SDK::Client.new(api_uri: ROOT_ADDRESS, pem: pem, insecure: true)
     sleep 1 # rate limit compliance
-    token = client.pair_pos_client(claim_code)
+    response = client.pair_client({facade: 'merchant'})
+    pairing_code = response.first["pairingCode"]
+    token = response  #.first["token"]
+    approve_token_on_server(pairing_code)
+    
+
     FileUtils.mkdir_p(BitPay::BITPAY_CREDENTIALS_DIR)
     File.write(BitPay::PRIVATE_KEY_PATH, pem)
     File.write(BitPay::TOKEN_FILE_PATH, JSON.generate(token))

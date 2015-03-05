@@ -154,6 +154,13 @@ client.get_all_refunds_for_invoice(id: 'PvVhgBfA7wKPWhuVC24rJo')
 # To get a specific refund for a specific invoice
 client.get_refund(id: 'JB49z2MsDH7FunczeyDS8j', request_id: '4evCrXq4EDXk4oqDXdWQhX')
 ```
+### Cancel Refund Requests
+
+Requires a `merchant` token.
+
+```ruby
+client.cancel_refund(id: 'JB49z2MsDH7FunczeyDS8j', request_id: '4evCrXq4EDXk4oqDXdWQhX')
+```
 
 ### Make a HTTP request directly against the REST API
 

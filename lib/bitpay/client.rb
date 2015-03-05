@@ -62,11 +62,22 @@ module BitPay
       #   Defaults to pos facade, also works with merchant facade
       # 
       def create_invoice(price:, currency:, facade: 'pos', params:{})
-        raise BitPay::ArgumentError, "Illegal Argument: Price must be formatted as a float" unless ( price.is_a?(Numeric) || /^[[:digit:]]+(\.[[:digit:]]{2})?$/.match(price) )
+        raise BitPay::ArgumentError, "Illegal Argument: Price must be formatted as a float" unless 
+          price.is_a?(Numeric) ||
+          /^[[:digit:]]+(\.[[:digit:]]{2})?$/.match(price) ||
+          currency == 'BTC' && /^[[:digit:]]+(\.[[:digit:]]{1,6})?$/.match(price)
         raise BitPay::ArgumentError, "Illegal Argument: Currency is invalid." unless /^[[:upper:]]{3}$/.match(currency)
         params.merge!({price: price, currency: currency})
         token = get_token(facade)
         post(path: "invoices", token: token, params: params)
+      end
+
+      ## Gets the privileged merchant-version of the invoice		
+      #   Requires merchant facade token		
+      #		
+      def get_invoice(id:)
+        token = get_token('merchant')
+        get(path: "invoices/#{id}", token: token)
       end
 
       ## Gets the public version of the invoice
@@ -75,6 +86,63 @@ module BitPay
         get(path: "invoices/#{id}", public: true)
       end
       
+      
+      ## Refund paid BitPay invoice
+      #
+      #   If invoice["data"]["flags"]["refundable"] == true the a refund address was 
+      #   provided with the payment and the refund_address parameter is an optional override
+      #  
+      #   Amount and Currency are required fields for fully paid invoices but optional
+      #   for under or overpaid invoices which will otherwise be completely refunded
+      #
+      #   Requires merchant facade token
+      #
+      #  @example
+      #    client.refund_invoice(id: 'JB49z2MsDH7FunczeyDS8j', params: {amount: 10, currency: 'USD', bitcoinAddress: '1Jtcygf8W3cEmtGgepggtjCxtmFFjrZwRV'})
+      #
+      def refund_invoice(id:, params:{})
+        invoice = get_invoice(id: id)
+        post(path: "invoices/#{id}/refunds", token: invoice["token"], params: params)
+      end
+      
+      ## Get All Refunds for Invoice
+      #   Returns an array of all refund requests for a specific invoice, 
+      # 
+      #   Requires merchant facade token
+      #
+      #  @example:
+      #    client.get_all_refunds_for_invoice(id: 'JB49z2MsDH7FunczeyDS8j')
+      #
+      def get_all_refunds_for_invoice(id:)
+        urlpath = "invoices/#{id}/refunds"
+        invoice = get_invoice(id: id)
+        get(path: urlpath, token: invoice["token"])
+      end
+
+      ## Get Refund
+      #   Requires merchant facade token
+      #
+      #  @example:
+      #    client.get_refund(id: 'JB49z2MsDH7FunczeyDS8j', request_id: '4evCrXq4EDXk4oqDXdWQhX')
+      #
+      def get_refund(id:, request_id:)
+        urlpath = "invoices/#{id}/refunds/#{request_id}"
+        invoice = get_invoice(id: id)
+        get(path: urlpath, token: invoice["token"])
+      end
+      
+      ## Cancel Refund
+      #   Requires merchant facade token
+      #
+      #  @example:
+      #    client.cancel_refund(id: 'JB49z2MsDH7FunczeyDS8j', request_id: '4evCrXq4EDXk4oqDXdWQhX')
+      #
+      def cancel_refund(id:, request_id:)
+        urlpath = "invoices/#{id}/refunds/#{request_id}"
+        refund = get_refund(id: id, request_id: request_id)
+        delete(path: urlpath, token: refund["token"])
+      end      
+
       ## Checks that the passed tokens are valid by
       #  comparing them to those that are authorized by the server
       #

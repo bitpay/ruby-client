@@ -21,8 +21,8 @@ Feature: creating an invoice
     Then they will receive a BitPay::ArgumentError matching <message>
   Examples:
     | price    | currency  | message                              |
-    | "5,023" | "USD"     | "Price must be formatted as a float" |
-    | "3.21"  | "EaUR"    | "Currency is invalid."               |
+    | "5,023"  | "USD"     | "Price must be formatted as a float" |
+    | "3.21"   | "EaUR"    | "Currency is invalid."               |
     | ""       | "USD"     | "Price must be formatted as a float" |
     | "Ten"    | "USD"     | "Price must be formatted as a float" |
-    | "10"    | ""        | "Currency is invalid."               |
+    | "10"     | ""        | "Currency is invalid."               |

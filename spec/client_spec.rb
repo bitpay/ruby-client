@@ -25,6 +25,12 @@ describe BitPay::SDK::Client do
         to_return(:body => get_fixture('invoices_{id}_refunds-GET.json'))
       stub_request(:post, "#{BitPay::TEST_API_URI}/invoices/TEST_INVOICE_ID/refunds").
         to_return(:body => get_fixture('invoices_{id}_refunds-POST.json'))
+      stub_request(:post, "#{BitPay::TEST_API_URI}/nuttin").
+        to_return(:body => get_fixture('response-nodata.json'))
+      stub_request(:get, "#{BitPay::TEST_API_URI}/nuttin").
+        to_return(:body => get_fixture('response-nodata.json'))
+      stub_request(:delete, "#{BitPay::TEST_API_URI}/nuttin").
+        to_return(:body => get_fixture('response-nodata.json'))
   end
 
   describe "#initialize" do
@@ -34,6 +40,14 @@ describe BitPay::SDK::Client do
       expect {bitpay_client}.to_not raise_error
     end
     
+  end
+
+  describe "requests to endpoint without data field" do
+    it "should return the json body" do
+      expect(bitpay_client.post(path: "nuttin", params: {})["facile"]).to eq("is easy")
+      expect(bitpay_client.get(path: "nuttin")["facile"]).to eq("is easy")
+      expect(bitpay_client.delete(path: "nuttin")["facile"]).to eq( "is easy")
+    end
   end
 
   describe "#send_request" do

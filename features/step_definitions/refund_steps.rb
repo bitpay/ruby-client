@@ -1,4 +1,5 @@
 Given(/^the user creates a refund$/) do
+  sleep(1)
   client = new_client_from_stored_values
   @response = client.refund_invoice(id: REFUND_TRANSACTION, params: {amount: 1, currency: 'USD', bitcoinAddress: REFUND_ADDRESS})
 end

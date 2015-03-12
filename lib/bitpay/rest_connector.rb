@@ -58,7 +58,7 @@ module BitPay
       end
 
       if response.kind_of? Net::HTTPSuccess
-        return JSON.parse(response.body)["data"]
+        return JSON.parse(response.body)
       elsif JSON.parse(response.body)["error"]
         raise(BitPayError, "#{response.code}: #{JSON.parse(response.body)['error']}")
       else
@@ -71,7 +71,7 @@ module BitPay
     #  updates @tokens
     #
     def refresh_tokens
-      response = get(path: 'tokens')
+      response = get(path: 'tokens')["data"]
       token_array = response || {}
       tokens = {}
       token_array.each do |t|

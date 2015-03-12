@@ -47,7 +47,8 @@ module BitPay
       # => Pass {pairingCode: 'WfD01d2'} to claim a server-initiated pairing code
       #
       def pair_client(params={})
-        post(path: 'tokens', params: params)
+        tokens = post(path: 'tokens', params: params)
+        return tokens["data"]
       end
 
       ## Compatibility method for pos pairing
@@ -69,13 +70,15 @@ module BitPay
         raise BitPay::ArgumentError, "Illegal Argument: Currency is invalid." unless /^[[:upper:]]{3}$/.match(currency)
         params.merge!({price: price, currency: currency})
         token = get_token(facade)
-        post(path: "invoices", token: token, params: params)
+        invoice = post(path: "invoices", token: token, params: params)
+        invoice["data"]
       end
 
       ## Gets the public version of the invoice
       #
       def get_public_invoice(id:)
-        get(path: "invoices/#{id}", public: true)
+        invoice = get(path: "invoices/#{id}", public: true)
+        invoice["data"]
       end
       
       ## Checks that the passed tokens are valid by

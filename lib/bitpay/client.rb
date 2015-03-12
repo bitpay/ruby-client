@@ -47,7 +47,8 @@ module BitPay
       # => Pass {pairingCode: 'WfD01d2'} to claim a server-initiated pairing code
       #
       def pair_client(params={})
-        post(path: 'tokens', params: params)
+        tokens = post(path: 'tokens', params: params)
+        return tokens["data"]
       end
 
       ## Compatibility method for pos pairing
@@ -69,7 +70,8 @@ module BitPay
         raise BitPay::ArgumentError, "Illegal Argument: Currency is invalid." unless /^[[:upper:]]{3}$/.match(currency)
         params.merge!({price: price, currency: currency})
         token = get_token(facade)
-        post(path: "invoices", token: token, params: params)
+        invoice = post(path: "invoices", token: token, params: params)
+        invoice["data"]
       end
 
       ## Gets the privileged merchant-version of the invoice		
@@ -77,13 +79,15 @@ module BitPay
       #		
       def get_invoice(id:)
         token = get_token('merchant')
-        get(path: "invoices/#{id}", token: token)
+        invoice = get(path: "invoices/#{id}", token: token)
+        invoice["data"]
       end
 
       ## Gets the public version of the invoice
       #
       def get_public_invoice(id:)
-        get(path: "invoices/#{id}", public: true)
+        invoice = get(path: "invoices/#{id}", public: true)
+        invoice["data"]
       end
       
       
@@ -102,7 +106,8 @@ module BitPay
       #
       def refund_invoice(id:, params:{})
         invoice = get_invoice(id: id)
-        post(path: "invoices/#{id}/refunds", token: invoice["token"], params: params)
+        refund = post(path: "invoices/#{id}/refunds", token: invoice["token"], params: params)
+        refund["data"]
       end
       
       ## Get All Refunds for Invoice
@@ -116,7 +121,8 @@ module BitPay
       def get_all_refunds_for_invoice(id:)
         urlpath = "invoices/#{id}/refunds"
         invoice = get_invoice(id: id)
-        get(path: urlpath, token: invoice["token"])
+        refunds = get(path: urlpath, token: invoice["token"])
+        refunds["data"]
       end
 
       ## Get Refund
@@ -128,7 +134,8 @@ module BitPay
       def get_refund(invoice_id:, request_id:)
         urlpath = "invoices/#{invoice_id}/refunds/#{request_id}"
         invoice = get_invoice(id: invoice_id)
-        get(path: urlpath, token: invoice["token"])
+        refund = get(path: urlpath, token: invoice["token"])
+        refund["data"]
       end
       
       ## Cancel Refund
@@ -140,7 +147,8 @@ module BitPay
       def cancel_refund(invoice_id:, request_id:)
         urlpath = "invoices/#{invoice_id}/refunds/#{request_id}"
         refund = get_refund(invoice_id: invoice_id, request_id: request_id)
-        delete(path: urlpath, token: refund["token"])
+        deletion = delete(path: urlpath, token: refund["token"])
+        deletion["data"]
       end      
 
       ## Checks that the passed tokens are valid by

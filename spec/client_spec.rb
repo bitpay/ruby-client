@@ -61,6 +61,13 @@ describe BitPay::SDK::Client do
         bitpay_client.send_request("GET", "whatever", facade: "merchant")
         expect(WebMock).to have_requested(:get, "#{BitPay::TEST_API_URI}/whatever?token=MERCHANT_TOKEN") 
       end
+      
+      it 'should handle query parameters gracefully' do
+        stub_request(:get, /#{BitPay::TEST_API_URI}\/ledgers.*/).to_return(:body => '{"awesome": "json"}')
+        bitpay_client.send_request("GET", "ledgers/BTC?startDate=2015-01-01&endDate=2015-02-01", facade: "merchant")
+        expect(WebMock).to have_requested(:get, "#{BitPay::TEST_API_URI}/ledgers/BTC?startDate=2015-01-01&endDate=2015-02-01&token=MERCHANT_TOKEN")
+      end
+      
     end
 
     context "POST" do

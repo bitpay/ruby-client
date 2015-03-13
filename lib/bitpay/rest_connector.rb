@@ -18,7 +18,8 @@ module BitPay
 
     def get(path:, token: nil, public: false)
       urlpath = '/' + path
-      urlpath = urlpath + '?token=' + token if token
+      token_prefix = if urlpath.include? '?' then '&token=' else '?token=' end
+      urlpath = urlpath + token_prefix + token if token
       request = Net::HTTP::Get.new urlpath
       unless public
         request['X-Signature'] = KeyUtils.sign(@uri.to_s + urlpath, @priv_key) 

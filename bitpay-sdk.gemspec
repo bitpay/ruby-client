@@ -20,6 +20,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'json',      '~>1.8'
   s.add_dependency 'rack',      '~>1.5'
   s.add_dependency 'ecdsa',     '~>1.2'
+  s.add_dependency 'bitpay_key_utils'
 
   s.add_development_dependency 'rake', '10.3.2'
   s.add_development_dependency 'webmock', '1.18.0'

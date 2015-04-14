@@ -6,7 +6,7 @@ require 'uri'
 require 'net/https'
 require 'json'
 
-require_relative 'key_utils'
+require 'bitpay_key_utils'
 require_relative 'rest_connector'
 
 module BitPay

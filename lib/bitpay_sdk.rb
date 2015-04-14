@@ -22,10 +22,7 @@ module BitPay
   # User agent reported to API
   USER_AGENT = 'ruby-bitpay-sdk '+VERSION
   
-  MISSING_PEM = 'No pem file specified. Pass pem string'
-  
   class BitPayError < StandardError; end
-  class ArgumentError < ArgumentError; end
   class ConnectionError < Errno::ECONNREFUSED; end
   
 end

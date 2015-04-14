@@ -28,6 +28,7 @@ Then(/^they will receive an array of refunds$/) do
 end
 
 Given(/^a properly formatted cancellation request$/) do
+  sleep(1)
   client = new_client_from_stored_values
   @refund_id = client.get_all_refunds_for_invoice(id: REFUND_TRANSACTION).first["id"]
   @response = client.cancel_refund(invoice_id: REFUND_TRANSACTION, request_id: @refund_id)

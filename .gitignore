@@ -9,3 +9,4 @@ pkg
 *.swp
 bitpaykey.pem
 constants.txt
+coverage/

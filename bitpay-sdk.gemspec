@@ -32,5 +32,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'airborne', '0.0.20'
   s.add_development_dependency 'rspec', '3.1.0'
   s.add_development_dependency 'mongo', '1.11.1'
-  s.add_development_dependency 'coveralls'
+  s.add_development_dependency 'codeclimate-test-reporter'
 end

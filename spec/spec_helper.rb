@@ -1,9 +1,9 @@
+require "codeclimate-test-reporter"
+CodeClimate::TestReporter.start
 require 'webmock/rspec'
 require 'pry'
 require 'capybara/rspec'
 require 'capybara/poltergeist'
-require 'coveralls'
-Coveralls.wear!
 
 require File.join File.dirname(__FILE__), '..', 'lib', 'bitpay_sdk.rb'
 require_relative '../config/constants.rb'

@@ -9,7 +9,7 @@ require_relative '../../config/capybara.rb'
 
 module BitPay
   # Location for API Credentials
-  BITPAY_CREDENTIALS_DIR = File.join(Dir.home, ".bitpay")
+  BITPAY_CREDENTIALS_DIR = File.join(File.dirname(__FILE__), '..', '..', 'temp')
   PRIVATE_KEY_FILE = 'bitpay.pem'
   PRIVATE_KEY_PATH = File.join(BITPAY_CREDENTIALS_DIR, PRIVATE_KEY_FILE)
   TOKEN_FILE = 'tokens.json'

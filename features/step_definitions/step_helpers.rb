@@ -9,7 +9,7 @@ require_relative '../../config/capybara.rb'
 
 module BitPay
   # Location for API Credentials
-  BITPAY_CREDENTIALS_DIR = File.join(File.dirname(__FILE__), '..', '..', 'temp')
+  BITPAY_CREDENTIALS_DIR = File.join(Dir.home, ".bitpay")
   PRIVATE_KEY_FILE = 'bitpay.pem'
   PRIVATE_KEY_PATH = File.join(BITPAY_CREDENTIALS_DIR, PRIVATE_KEY_FILE)
   TOKEN_FILE = 'tokens.json'
@@ -26,7 +26,6 @@ def get_claim_code_from_server
   Capybara::find(".token-access-new-button").find(".btn").find(".icon-plus", match: :first).trigger("click")
   sleep 0.50
   Capybara::find(".token-access-new-button-wrapper").find_by_id("token-new-form", visible: true).find(".btn").trigger("click")
-  sleep 0.50
   Capybara::find(".token-claimcode", match: :first).text
 end
 
@@ -36,8 +35,6 @@ def approve_token_on_server(pairing_code)
   Capybara::visit DASHBOARD_URL
   raise "Bad Login" unless Capybara.current_session.current_url == DASHBOARD_URL
   Capybara::visit "#{ROOT_ADDRESS}/api-tokens"
-  Capybara::find(".token-access-new-button").find(".btn").find(".icon-plus", match: :first)
-  sleep 0.50
   Capybara::fill_in 'pairingCode', :with => pairing_code
   Capybara::click_button "Find"
   Capybara::click_button "Approve"
@@ -65,9 +62,7 @@ def new_client_from_stored_values
     pem = File.read(BitPay::PRIVATE_KEY_PATH)
     client = BitPay::SDK::Client.new(pem: pem, tokens: token, insecure: true, api_uri: ROOT_ADDRESS )
     unless client.verify_tokens then 
-      FileUtils.rmdir(BitPay::BITPAY_CREDENTIALS_DIR) 
-      new_client_from_stored_values
-    end
+      raise "Locally stored tokens are invalid, please remove #{BitPay::TOKEN_FILE_PATH}" end
   else
     pem = BitPay::KeyUtils.generate_pem
     client = BitPay::SDK::Client.new(api_uri: ROOT_ADDRESS, pem: pem, insecure: true)

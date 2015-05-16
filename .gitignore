@@ -10,4 +10,3 @@ pkg
 bitpaykey.pem
 constants.txt
 coverage/
-temp/

@@ -36,8 +36,10 @@ def approve_token_on_server(pairing_code)
   raise "Bad Login" unless Capybara.current_session.current_url == DASHBOARD_URL
   Capybara::visit "#{ROOT_ADDRESS}/api-tokens"
   Capybara::fill_in 'pairingCode', :with => pairing_code
-  Capybara::click_button "Find"
-  Capybara::click_button "Approve"
+  sleep 0.50
+  Capybara::find(".token-access-approve-pairing").find(".token-access-approve-pairing-code").find(".btn").trigger("click")
+  sleep 0.50
+  Capybara::find(".token-access-request-manager").find(".token-access-request").find(".api-manager-actions-confirm").find(".ajaxForm").find(".btn").trigger("click")
 end
 
 def log_in

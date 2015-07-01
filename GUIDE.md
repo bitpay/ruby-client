@@ -31,6 +31,26 @@ Your client can be paired via the `pos` (point-of-sale) or `merchant` facade (or
 
 _For development or quick deployment purposes, consider the [BitPay Ruby Command-Line Interface](https://github.com/bitpay/ruby-cli) to simplify the deployment process_
 
+### A quick note on keys
+
+The BitPay client gem includes the BitPay KeyUtilities gem, which can be used to generate new public private key pairs which it returns in PEM format. However, there are no methods which save the keys anywhere, so it is your responsibility to store the PEM file somewhere secure.
+
+### BitPay authentication
+
+BitPay authentication depends on four parts:
+1. An account on our servers.
+2. A token shared between the client and the server.
+3. A public key, shared between the client and the server.
+4. A private key, held exclusively by the client.
+
+In order to complete authentication, you have to associate your private key with a token, and associate that token with an account. Once this authentication is complete, as long as you have the private key, you never have to authenticate again. The token you created will always be associated with that private key, so any time you create a new bitpay client object with that key, it is authenticated with BitPay. This is true whether you use the ruby-client, python client, or no client at all, the key is the important thing. 
+
+There are two ways to authenticate, from the client side or the server side. The Ruby Client supports both.
+
+To pair from the server side, you log in to the BitPay server, navigate to dashboard/merchant/api-tokens, and create a new token. This creates a new token, which is associated with your account. It is not associated with a key, so we provide a pairing code that you can use as a one time secret to associate the token with a key. From the client side, you can use the client.pair_pos_client(<pairing_code>) method to associate that method with a key held by the client.
+
+To pair from the client side, you use the client to call the /tokens endpoint on the server with no parameters. This creates a token on the server and associates that token with a public key. What it doesn't do is associate that token to an account (because we don't know what account to associate with). This call returns a pairing code, which is a one time secret that allows you to find the token you just created. In order to associate the token with an account, you log in to the BitPay server, and use the dashboard/merchant/api-tokens interface to associate the token with a specific account. And example of client side pairing is shown below.
+
 ### Pairing Programatically
 
 If you are developing a client with built-in pairing capability, you can pair programattically using the `pair_client` method.  This method can be called in two ways:
@@ -38,23 +58,24 @@ If you are developing a client with built-in pairing capability, you can pair pr
   * `pair_client()` will perform a client-initiated pairing, and will provide a pairing code that can be entered at https://bitpay.com/dashboard/merchant/api-tokens to assign either `merchant` or `pos` facade.
   * `pair_client('pairing_code')` will complete a server-initiated pairing, when provided a pre-generated pairing code from https://bitpay.com/dashboard/merchant/api-tokens.  In this case, the `pos` facade will be automatically assigned.
 
-The example below demonstrates this using a locally generated PEM file using OpenSSL and the irb tool.
+This is an example of creating a paired client with the BitPay toolset.
 
 ```bash
 $ gem install bitpay-sdk
 Successfully installed bitpay-sdk-2.2.0
 1 gem installed
-$ openssl ecparam -genkey -name secp256k1 -noout -out bitpaykey.pem
 $ irb
 2.1.1 :001 > require 'bitpay_sdk'
  => true 
-2.1.1 :002 > client = BitPay::SDK::Client.new(api_uri: 'https://test.bitpay.com', pem: File.read('bitpaykey.pem'), insecure: true)
+2.1.2 :002 > pem = BitPay::KeyUtils.generate_pem
+ => "-----BEGIN EC PRIVATE KEY-----\nMHQCAQEEIH8oSTRm8lVMTVOsDZleIB8AmkiuHnp+ctEknqeUmZahoAcGBSuBBAAK\noUQDQgAEbjhdKA+X8NEKgcbHhyJaBMvePV7Sj6AQuOMQzuZYdskdkPY1/jlfQwNG\n4GVd/zSw4uhfukw/SDBOEKlQGVAmxQ==\n-----END EC PRIVATE KEY-----\n" 
+2.1.1 :002 > client = BitPay::SDK::Client.new(api_uri: 'https://test.bitpay.com', pem: pem)
  => #<BitPay::SDK::Client:0x000000019c6d40 @pem="---... @tokens={}> 
 2.1.1 :003 > client.pair_client()
  => {"data"=>[{"policies"=>[{"policy"=>"id", "method"=>"inactive", "params"=>["Tf49SFeiUAtytFEW2EUqZgWj32nP51PK73M"]}], "token"=>"BKQyVdaGQZAArdkkSuvtZN5gcN2355c8vXLj5eFPkfuK", "dateCreated"=>1422474475162, "pairingExpiration"=>1422560875162, "pairingCode"=>"Vy76yTh"}]} 
 ```
 
-As described above, using the value from the `pairingCode` element, visit https://test.bitpay.com/api-tokens and search to register for the appropriate facade
+As described above, using the value from the `pairingCode` element, visit https://test.bitpay.com/api-tokens and search to register for the appropriate facade. That client is now paired. As previously mentioned, you must save the pem string you generated in order to use the client again.
 
 ## General Usage
 

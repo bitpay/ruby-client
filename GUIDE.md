@@ -38,10 +38,11 @@ The BitPay client gem includes the BitPay KeyUtilities gem, which can be used to
 ### BitPay authentication
 
 BitPay authentication depends on four parts:
+
 1. An account on our servers.
-2. A token shared between the client and the server.
-3. A public key, shared between the client and the server.
-4. A private key, held exclusively by the client.
+1. A token shared between the client and the server.
+1. A public key, shared between the client and the server.
+1. A private key, held exclusively by the client.
 
 In order to complete authentication, you have to associate your private key with a token, and associate that token with an account. Once this authentication is complete, as long as you have the private key, you never have to authenticate again. The token you created will always be associated with that private key, so any time you create a new bitpay client object with that key, it is authenticated with BitPay. This is true whether you use the ruby-client, python client, or no client at all, the key is the important thing. 
 

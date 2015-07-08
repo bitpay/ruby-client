@@ -88,5 +88,6 @@ def get_token_from_file
 end
 
 def logged_in
-  Capybara::has_link?('Dashboard')
+  Capybara::visit DASHBOARD_URL
+  Capybara::page.has_content?('Dashboard') #has_link?('Dashboard')
 end

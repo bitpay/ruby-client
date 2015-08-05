@@ -10,7 +10,7 @@ Powerful, flexible, lightweight interface to the BitPay Bitcoin Payment Gateway 
 
 The `bitpay-sdk` gem provides all the programattic tools required to implement a ruby client application for the BitPay REST API.  For developers who prefer the ease of command-line pairing during the development or deployment process, BitPay provides a complementary [Ruby CLI gem](https://github.com/bitpay/ruby-cli) which can be used in conjunction with this gem.
 
-## [Getting Started &raquo;](http://dev.bitpay.com/guides/ruby.html)
+## [Getting Started &raquo;](https://github.com/bitpay/ruby-client/blob/master/GUIDE.md)
 
 ## Found a bug?
 Let us know! Send a pull request or a patch. Questions? Ask! We're here to help. We will respond to all filed issues.

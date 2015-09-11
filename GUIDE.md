@@ -29,8 +29,6 @@ Most calls to the BitPay REST API require that your client is paired with the bi
 
 Your client can be paired via the `pos` (point-of-sale) or `merchant` facade (or both).  The `pos` facade allows for invoices to be created.  The `merchant` facade has broader privileges to view all invoices, bills, and ledger entries, as well as to issue refunds.  Consider the level of access required when you pair your client.
 
-_For development or quick deployment purposes, consider the [BitPay Ruby Command-Line Interface](https://github.com/bitpay/ruby-cli) to simplify the deployment process_
-
 ### A quick note on keys
 
 The BitPay client gem includes the BitPay KeyUtilities gem, which can be used to generate new public private key pairs which it returns in PEM format. However, there are no methods which save the keys anywhere, so it is your responsibility to store the PEM file somewhere secure.

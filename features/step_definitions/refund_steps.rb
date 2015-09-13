@@ -1,7 +1,6 @@
 Given(/^the user creates a refund$/) do
   sleep(1)
-  client = new_client_from_stored_values
-  @response = client.refund_invoice(id: REFUND_TRANSACTION, params: {amount: 1, currency: 'USD', bitcoinAddress: REFUND_ADDRESS})
+  @response = @client.refund_invoice(id: REFUND_TRANSACTION, params: {amount: 1, currency: 'USD', bitcoinAddress: REFUND_ADDRESS})
 end
 
 Then(/^they will receive a refund id$/) do
@@ -10,8 +9,7 @@ Then(/^they will receive a refund id$/) do
 end
 
 Given(/^the user requests a specific refund$/) do
-  client = new_client_from_stored_values
-  @response = client.get_refund(invoice_id: REFUND_TRANSACTION, request_id: @refund_id)
+  @response = @client.get_refund(invoice_id: REFUND_TRANSACTION, request_id: @refund_id)
 end
 
 Then(/^they will receive the refund$/) do

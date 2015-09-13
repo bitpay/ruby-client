@@ -3,6 +3,9 @@ Feature: issuing a refund
   The merchant wants to issue a refund
   So that they can serve their customers
 
+  Background:
+    Given the user is authenticated with BitPay
+
   Scenario: creating a refund
     Given the user creates a refund
     Then they will receive a refund id

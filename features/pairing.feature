@@ -5,11 +5,11 @@ Feature: pairing with bitpay
 
   Scenario: the client has a correct pairing code
     Given the user pairs with BitPay with a valid pairing code
-    Then the user is paired with BitPay
+    Then the user receives a require token from bitpay
 
   Scenario: the client initiates pairing
     Given the user performs a client-side pairing
-    Then the user has a merchant token
+    Then the user receives an inactive token from bitpay
 
   Scenario Outline: the client has a bad pairing code
     Given the user fails to pair with a semantically <valid> code <code>
@@ -17,8 +17,3 @@ Feature: pairing with bitpay
   Examples:
       | valid   | code       | error                 | message                       |
       | invalid | "a1b2c3d4" | BitPay::ArgumentError | "pairing code is not legal"   |
-
-  Scenario: the client has a bad port configuration to a closed port
-    When the fails to pair with BitPay because of an incorrect port
-    Then they will receive a BitPay::ConnectionError matching "Connection refused" 
-

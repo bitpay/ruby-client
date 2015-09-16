@@ -184,12 +184,20 @@ client.cancel_refund(id: 'JB49z2MsDH7FunczeyDS8j', request_id: '4evCrXq4EDXk4oqD
 
 ### Make a HTTP request directly against the REST API
 
-For API tasks which lack a dedicated library method, BitPay provides a method that will automatically apply the proper cryptographic parameters to a request.
+For API tasks which lack a dedicated library method, BitPay provides methods that will automatically apply the proper cryptographic parameters to a request.
 
 ```ruby
-client.send_request("GET", "/invoices/JB49z2MsDH7FunczeyDS8j", facade: 'merchant')
+client.send_request("GET", "invoices/JB49z2MsDH7FunczeyDS8j", facade: 'merchant')
+## This request is identical to:
+token = client.get_token("merchant")
+client.get(path: "invoices/JB49z2MsDH7FunczeyDS8j", token: token)
+
+## post requests are also possible
+token = client.get_token("merchant")
+client.post(path: "tokens", token: token, params: {facade: "pos"})  #returns a new token with pairing code
+## equivalent to
+client.send_request("POST", "tokens", facade: 'merchant', params: {facade: 'pos'})
 ```
-    
 Usage:
  * Specify HTTP verb and REST endpoint
  * Specifying a `facade` will fetch and apply the corresponding `token`

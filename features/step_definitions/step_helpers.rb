@@ -15,7 +15,7 @@ module BitPay
 end
 
 def new_client_from_stored_values
-  pem = ENV['BITPAYPEM'].gsub("\\n", "\n")
+  pem = PEM.gsub("\\n", "\n")
   BitPay::SDK::Client.new(api_uri: APIURI, pem: pem, insecure: true)
 end
 

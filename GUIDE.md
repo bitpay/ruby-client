@@ -81,7 +81,7 @@ As described above, using the value from the `pairingCode` element, visit https:
 ### Initialize the client
 
 ```ruby
-client = BitPay::SDK::Client.new(pem: File.read('bitpaykey.pem')
+client = BitPay::SDK::Client.new(pem: File.read('bitpaykey.pem'))
 ```
     
 Optional parameters:
@@ -94,7 +94,7 @@ Optional parameters:
 ### Create a new bitcoin invoice
 
 ```ruby
-invoice = client.create_invoice (price: <price>, currency: <currency>)
+invoice = client.create_invoice(price: <price>, currency: <currency>)
 ```
 
 With invoice creation, `price` and `currency` are the only required fields. If you are sending a customer from your website to make a purchase, setting `redirectURL` will redirect the customer to your website when the invoice is paid.

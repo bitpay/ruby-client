@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'bitpay-key-utils', '~>2.0.0'
 
-  s.add_development_dependency 'rack', '~>1.5'
+  s.add_development_dependency 'rack', '~>2.0.0'
   s.add_development_dependency 'rake', '10.3.2'
   s.add_development_dependency 'webmock', '1.18.0'
   s.add_development_dependency 'pry', '0.10.1'

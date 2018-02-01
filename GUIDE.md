@@ -81,7 +81,7 @@ As described above, using the value from the `pairingCode` element, visit https:
 ### Initialize the client
 
 ```ruby
-client = BitPay::SDK::Client.new(pem: File.read('bitpaykey.pem')
+client = BitPay::SDK::Client.new(pem: File.read('bitpaykey.pem'))
 ```
     
 Optional parameters:

@@ -1,10 +1,10 @@
 require './lib/bitpay/version.rb'
 Gem::Specification.new do |s|
-  s.name = 'bitpay-sdk'
+  s.name = 'bitpay-client'
   s.version = BitPay::VERSION
   s.licenses = ['MIT']
   s.authors = 'Bitpay, Inc.'
-  s.email = 'info@bitpay.com'
+  s.email = 'sales-engineering@bitpay.com'
   s.homepage = 'https://github.com/bitpay/ruby-client'
   s.summary = 'Official Ruby library for the BitPay API'
   s.description = 'Powerful, flexible, lightweight, thread-safe interface to the BitPay developers API'
@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
   s.bindir        = 'bin'
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
 
-  s.add_dependency 'bitpay-key-utils', '~>2.0.0'
+  s.add_dependency 'bitpay-key-utils', '~> 2.1.1905'
 
   s.add_development_dependency 'rack', '~> 2.0'
   s.add_development_dependency 'rake', '12.0'

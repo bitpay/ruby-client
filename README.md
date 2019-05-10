@@ -17,3 +17,5 @@ Let us know! Send a pull request or a patch. Questions? Ask! We're here to help.
 
 ## Contributors
 [Click here](https://github.com/bitpay/ruby-client/graphs/contributors) to see a list of the contributors to this library.
+
+new text

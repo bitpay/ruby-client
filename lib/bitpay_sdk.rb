@@ -20,7 +20,7 @@ module BitPay
   
 
   # User agent reported to API
-  USER_AGENT = 'ruby-bitpay-sdk '+VERSION
+  USER_AGENT = 'BitPay_Ruby_Client_v'+VERSION
   
   class BitPayError < StandardError; end
   class ConnectionError < Errno::ECONNREFUSED; end

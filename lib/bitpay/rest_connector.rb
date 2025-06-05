@@ -32,7 +32,6 @@ module BitPay
       urlpath = '/' + path
       request = Net::HTTP::Post.new urlpath
       params[:token] = token if token
-      params[:guid]  = SecureRandom.uuid
       params[:id] = @client_id
       request.body = params.to_json
       if token
